@@ -4,14 +4,19 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "cloudflare:build": "next build",
+    "vite:dev": "vite",
+    "vite:build": "vite build",
     "preview": "vite preview",
     "test": "node test/app.test.js"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
     "lucide-react": "^1.16.0",
+    "next": "^16.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

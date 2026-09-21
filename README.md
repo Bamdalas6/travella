@@ -70,25 +70,61 @@ Built with **React 19**, **Vite**, **Tailwind CSS**, and **Lucide Icons**.
 
 ---
 
+## ⚡ Frameworks & Platforms
+
+1. **Next.js Web App (Cloudflare Ready):**
+   - Built with **Next.js 16 (Turbopack)**, **React 19**, and **Tailwind CSS**.
+   - Cloudflare Pages static export configuration (`output: 'export'`) with unoptimized images and trailing slashes for zero-latency edge distribution.
+   - Includes `wrangler.toml`, `public/_headers` (security headers & static asset caching), and `public/_routes.json`.
+   - Output directory: `out/`.
+
+2. **Flutter Mobile Application (`travella_flutter/`):**
+   - Complete native Flutter codebase for iOS and Android.
+   - Models, state management, components, screens (Home, Details, Booking, Explore, Saved, Bookings, Profile).
+   - Automated unit test suite.
+
+---
+
 ## 🚀 Getting Started
 
-### Prerequisites
-- Node.js (v18+ or v20+)
-- npm
+### Web App (Next.js)
 
-### Development
+#### Development
 ```bash
 npm install
 npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Production Build
+#### Cloudflare Pages Production Build
 ```bash
 npm run build
 ```
+Generates the static export in `./out` ready to be served by Cloudflare Pages or Wrangler CLI.
 
-### Run Automated Tests
+#### Deploy with Wrangler
+```bash
+npx wrangler pages deploy out
+```
+
+#### Run Web Automated Tests
 ```bash
 npm test
 ```
+
+---
+
+### Flutter Mobile App (`travella_flutter/`)
+
+```bash
+cd travella_flutter
+flutter pub get
+flutter run
+```
+
+Run Flutter tests:
+```bash
+cd travella_flutter
+flutter test
+```
+
