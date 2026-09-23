@@ -1,40 +1,37 @@
-import React, { useState } from 'react';
-import { Bell, Sparkles, CheckCheck, X } from 'lucide-react';
-import { USER_PROFILE } from '../data/destinations';
+import React, { useState, useEffect } from 'react';
+import { Bell, Sparkles, CheckCheck, X, LogIn, User as UserIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Header({ onProfileClick, onSelectDestination }) {
+  const { user, openAuthModal } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(2);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "Exclusive 20% Discount",
-      desc: "Amalfi Coast villa has special weekend rates available!",
-      time: "10m ago",
-      unread: true,
-      destId: "dest-1"
-    },
-    {
-      id: 2,
-      title: "Weather Alert for Santorini",
-      desc: "Sunny 27°C expected all week for your saved destination.",
-      time: "1h ago",
-      unread: true,
-      destId: "dest-2"
-    },
-    {
-      id: 3,
-      title: "Passport Reminder",
-      desc: "Ensure passport is valid for upcoming European travel.",
-      time: "1d ago",
-      unread: false
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('travella_notifications');
+      if (stored) {
+        setNotifications(JSON.parse(stored));
+      }
+    } catch (e) {
+      // ignore
     }
-  ]);
+  }, []);
+
+  const unreadCount = notifications.filter((n) => n.unread).length;
 
   const markAllRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, unread: false })));
-    setUnreadCount(0);
+    const updated = notifications.map((n) => ({ ...n, unread: false }));
+    setNotifications(updated);
+    try {
+      localStorage.setItem('travella_notifications', JSON.stringify(updated));
+    } catch (e) {
+      // ignore
+    }
   };
+
+  const displayName = user?.name || 'Explorer';
+  const displayAvatar = user?.avatar;
 
   return (
     <div className="relative px-6 pt-3 pb-4">
@@ -42,16 +39,18 @@ export default function Header({ onProfileClick, onSelectDestination }) {
         {/* Greeting & Name */}
         <div>
           <p className="text-[13px] font-medium text-[#6A717A] tracking-normal">
-            Good morning,
+            {user ? 'Good morning,' : 'Welcome to Travella,'}
           </p>
           <h1 className="text-2xl sm:text-[26px] font-bold text-[#1A1C1E] tracking-tight flex items-center gap-1.5 mt-0.5">
-            <span>{USER_PROFILE.name}</span>
-            <span className="inline-block animate-bounce text-xl">👋</span>
+            <span>{displayName}</span>
+            <span className="inline-block animate-bounce text-xl">
+              {user ? '👋' : '✈️'}
+            </span>
           </h1>
         </div>
 
         {/* Action icons & Profile Avatar */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           {/* Notification Bell */}
           <div className="relative">
             <button
@@ -72,9 +71,13 @@ export default function Header({ onProfileClick, onSelectDestination }) {
                 <div className="flex items-center justify-between pb-3 border-b border-[#F4F3EF]">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm text-[#1A1C1E]">Notifications</span>
-                    {unreadCount > 0 && (
+                    {unreadCount > 0 ? (
                       <span className="px-2 py-0.5 text-[11px] font-medium bg-[#E8F1F8] text-[#387FAB] rounded-full">
                         {unreadCount} new
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 text-[11px] font-medium bg-[#F4F3EF] text-[#6A717A] rounded-full">
+                        0 unread alerts
                       </span>
                     )}
                   </div>
@@ -90,57 +93,95 @@ export default function Header({ onProfileClick, onSelectDestination }) {
                     <button
                       onClick={() => setShowNotifications(false)}
                       className="p-1 text-[#6A717A] hover:text-[#1A1C1E] rounded-md"
+                      aria-label="Close notifications"
                     >
                       <X className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
-                <div className="divide-y divide-[#F4F3EF] max-h-64 overflow-y-auto no-scrollbar py-1">
-                  {notifications.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => {
-                        if (item.destId && onSelectDestination) {
-                          onSelectDestination(item.destId);
-                          setShowNotifications(false);
-                        }
-                      }}
-                      className={`py-3 px-1.5 transition-colors cursor-pointer rounded-lg hover:bg-[#F8F7F4] ${item.unread ? 'bg-[#FAF9F6]' : ''}`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-xs font-semibold text-[#1A1C1E] flex items-center gap-1.5">
-                          {item.title}
-                          {item.unread && <span className="w-1.5 h-1.5 rounded-full bg-[#387FAB]"></span>}
-                        </p>
-                        <span className="text-[10px] text-[#8E95A0] whitespace-nowrap">{item.time}</span>
-                      </div>
-                      <p className="text-[11px] text-[#6A717A] mt-1 line-clamp-2">
-                        {item.desc}
-                      </p>
+                {notifications.length === 0 ? (
+                  /* R2: First-time user friendly empty state */
+                  <div className="py-8 px-3 text-center">
+                    <div className="w-12 h-12 rounded-full bg-[#E8F1F8] text-[#387FAB] flex items-center justify-center mx-auto mb-3">
+                      <Bell className="w-5 h-5 stroke-[1.8]" />
                     </div>
-                  ))}
-                </div>
+                    <p className="text-xs font-bold text-[#1A1C1E]">No notifications yet</p>
+                    <p className="text-[11px] text-[#6A717A] mt-1 max-w-[220px] mx-auto leading-relaxed">
+                      No notifications yet — Explore destinations to receive updates
+                    </p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-[#F4F3EF] max-h-64 overflow-y-auto no-scrollbar py-1">
+                    {notifications.map((item) => (
+                      <div
+                        key={item.id}
+                        onClick={() => {
+                          if (item.destId && onSelectDestination) {
+                            onSelectDestination(item.destId);
+                            setShowNotifications(false);
+                          }
+                        }}
+                        className={`py-3 px-1.5 transition-colors cursor-pointer rounded-lg hover:bg-[#F8F7F4] ${
+                          item.unread ? 'bg-[#FAF9F6]' : ''
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <p className="text-xs font-semibold text-[#1A1C1E] flex items-center gap-1.5">
+                            {item.title}
+                            {item.unread && <span className="w-1.5 h-1.5 rounded-full bg-[#387FAB]" />}
+                          </p>
+                          <span className="text-[10px] text-[#8E95A0] whitespace-nowrap">{item.time}</span>
+                        </div>
+                        <p className="text-[11px] text-[#6A717A] mt-1 line-clamp-2">
+                          {item.desc}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
+          {/* Auth Trigger Button & Profile Avatar */}
+          {!user ? (
+            <button
+              type="button"
+              onClick={() => openAuthModal('login')}
+              className="px-3 py-1.5 bg-[#387FAB] hover:bg-[#2E698D] text-white rounded-full text-xs font-bold transition-all duration-200 shadow-sm active:scale-95 flex items-center gap-1"
+              title="Sign In to your account"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Sign In</span>
+            </button>
+          ) : null}
+
           {/* Profile Avatar Button */}
           <button
             type="button"
-            onClick={onProfileClick}
+            onClick={user ? onProfileClick : () => openAuthModal('login')}
             className="relative rounded-full p-0.5 ring-2 ring-[#387FAB]/20 hover:ring-[#387FAB] transition-all duration-200 active:scale-95"
-            title="Open Profile"
+            title={user ? 'Open Profile' : 'Sign In'}
           >
-            <img
-              src={USER_PROFILE.avatar}
-              alt={USER_PROFILE.fullName}
-              className="w-10 h-10 rounded-full object-cover shadow-sm"
-            />
-            <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-white" />
+            {displayAvatar ? (
+              <img
+                src={displayAvatar}
+                alt={user?.fullName || 'User avatar'}
+                className="w-9 h-9 rounded-full object-cover shadow-sm"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-[#E8F1F8] text-[#387FAB] flex items-center justify-center">
+                <UserIcon className="w-4 h-4" />
+              </div>
+            )}
+            {user && (
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
+            )}
           </button>
         </div>
       </div>
     </div>
   );
 }
+

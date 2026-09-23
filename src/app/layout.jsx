@@ -1,4 +1,5 @@
 import '../index.css';
+import { AuthProvider } from '../context/AuthContext';
 
 export const metadata = {
   title: 'Travella — Modern Travel & Stay Discovery',
@@ -27,7 +28,9 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="bg-[#F8F7F4] text-[#1A1C1E] antialiased">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

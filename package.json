@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/sync-dist.js",
     "start": "next start",
-    "cloudflare:build": "next build",
+    "cloudflare:build": "next build && node scripts/sync-dist.js",
     "vite:dev": "vite",
     "vite:build": "vite build",
     "preview": "vite preview",

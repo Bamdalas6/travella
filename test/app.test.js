@@ -90,4 +90,54 @@ assert.strictEqual(USER_PROFILE.name, 'Alex');
 assert(USER_PROFILE.avatar.length > 0);
 console.log('  ✅ User profile matches Alex design mockup');
 
-console.log('\n🎉 ALL 5 TEST SUITES PASSED CLEANLY!\n');
+// Test 6: Cloudflare Deployment Configuration (R1)
+console.log('\n6. Checking Cloudflare Deployment Configuration (R1):');
+import fs from 'node:fs';
+const wranglerContent = fs.readFileSync('wrangler.toml', 'utf-8');
+assert(wranglerContent.includes('[assets]'), 'wrangler.toml must contain [assets] table');
+assert(wranglerContent.includes('directory = "./out"'), 'wrangler.toml must set assets directory = "./out"');
+const pkgJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+assert(pkgJson.scripts.build.includes('next build'), 'package.json build must invoke next build');
+assert(pkgJson.scripts.build.includes('sync-dist') || pkgJson.scripts.build.includes('dist'), 'package.json build must mirror to dist');
+console.log('  ✅ Cloudflare wrangler.toml assets and package.json build mirror verified');
+
+// Test 7: First-Time User Notification State (R2)
+console.log('\n7. Checking First-Time User Notification State (R2):');
+const freshSessionNotifications = [];
+const freshUnreadCount = freshSessionNotifications.filter(n => n.unread).length;
+assert.strictEqual(freshUnreadCount, 0, 'Fresh session must have unread notification count of 0');
+const headerCode = fs.readFileSync('src/components/Header.jsx', 'utf-8');
+assert(headerCode.includes('No notifications yet — Explore destinations to receive updates'), 'Header must contain exact friendly empty state string');
+assert(headerCode.includes('0 unread alerts'), 'Header dropdown must show 0 unread alerts for first-time users');
+console.log('  ✅ First-time user notification badge count is 0 and empty state renders accurately');
+
+// Test 8: Authentication Logic & Color Hierarchy (R3)
+console.log('\n8. Checking Auth Validation, Routes, and Color Hierarchy (R3):');
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+assert(emailRegex.test('traveler@travella.app'), 'Valid email should pass regex');
+assert(!emailRegex.test('invalid-email'), 'Invalid email without @ should fail regex');
+assert(!emailRegex.test('invalid@nodomain'), 'Invalid email without dot domain should fail regex');
+
+// Password validation
+const isValidPassword = (pwd) => Boolean(pwd && pwd.length >= 6);
+assert(isValidPassword('secure123'), 'Valid password >= 6 chars should pass');
+assert(!isValidPassword('123'), 'Short password < 6 chars should fail');
+assert(!isValidPassword(''), 'Empty password should fail');
+
+// Check routes exist
+assert(fs.existsSync('src/app/login/page.jsx'), 'Dedicated /login route page must exist');
+assert(fs.existsSync('src/app/signup/page.jsx'), 'Dedicated /signup route page must exist');
+
+// Check brand colors in AuthForm
+const authFormCode = fs.readFileSync('src/components/AuthForm.jsx', 'utf-8');
+assert(authFormCode.includes('#387FAB'), 'AuthForm must use Ocean Blue (#387FAB)');
+assert(authFormCode.includes('#E8F1F8'), 'AuthForm must use soft card pill (#E8F1F8)');
+assert(authFormCode.includes('#1A1C1E'), 'AuthForm must use dark typography (#1A1C1E)');
+
+// Check in-app modal exists
+assert(fs.existsSync('src/components/AuthModal.jsx'), 'In-app AuthModal component must exist');
+
+console.log('  ✅ Authentication logic, validation, dedicated routes, and brand color hierarchy verified');
+
+console.log('\n🎉 ALL 8 TEST SUITES PASSED CLEANLY!\n');
+

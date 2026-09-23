@@ -13,15 +13,18 @@ import SpecialOffers from './components/SpecialOffers';
 import DestinationDetails from './components/DestinationDetails';
 import BookingModal from './components/BookingModal';
 import FilterModal from './components/FilterModal';
+import AuthModal from './components/AuthModal';
 import BottomNav from './components/BottomNav';
 import ExploreTab from './components/ExploreTab';
 import SavedTab from './components/SavedTab';
 import BookingsTab from './components/BookingsTab';
 import ProfileTab from './components/ProfileTab';
 import Toast from './components/Toast';
+import { useAuth } from './context/AuthContext';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
 export default function App() {
+  const { user } = useAuth();
   const [destinations] = useState(DESTINATIONS);
   const [activeTab, setActiveTab] = useState('home');
   const [selectedDestinationId, setSelectedDestinationId] = useState(null);
@@ -138,7 +141,11 @@ export default function App() {
   };
 
   const handleBookingSuccess = (newBooking) => {
-    setBookings([newBooking, ...bookings]);
+    const bookingWithUser = {
+      ...newBooking,
+      guestName: user ? user.fullName : (newBooking.guestName || 'Alex Morgan')
+    };
+    setBookings([bookingWithUser, ...bookings]);
     showToast(`Booking ${newBooking.id} successfully reserved!`);
   };
 
@@ -277,7 +284,10 @@ export default function App() {
 
             {activeTab === 'bookings' && (
               <BookingsTab
-                bookings={bookings}
+                bookings={bookings.map((b) => ({
+                  ...b,
+                  guestName: user ? user.fullName : (b.guestName || 'Alex Morgan')
+                }))}
                 onSelectDestination={(id) => setSelectedDestinationId(id)}
                 onShowToast={showToast}
               />
@@ -321,6 +331,8 @@ export default function App() {
           showToast('Search filters updated');
         }}
       />
+      {/* Screen 4: Interactive In-App Authentication Modal */}
+      <AuthModal onShowToast={showToast} />
     </DeviceFrame>
   );
 }
