@@ -1,19 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, CheckCircle2, Calendar, Users, ShieldCheck, CreditCard, Sparkles, ArrowRight } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useAuth } from '../context/AuthContext';
 
 export default function BookingModal({
   bookingData,
   onClose,
   onBookingSuccess
 }) {
+  const { user } = useAuth();
   const [step, setStep] = useState('review'); // 'review' | 'processing' | 'confirmed'
-  const [guestName, setGuestName] = useState('Alex Morgan');
-  const [guestEmail, setGuestEmail] = useState('alex.morgan@travella.app');
+  const [guestName, setGuestName] = useState(user?.fullName || user?.name || 'Alex Morgan');
+  const [guestEmail, setGuestEmail] = useState(user?.email || 'alex.morgan@travella.app');
   const [paymentMethod, setPaymentMethod] = useState('apple-pay');
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      if (user.fullName || user.name) setGuestName(user.fullName || user.name);
+      if (user.email) setGuestEmail(user.email);
+    }
+  }, [user]);
 
   if (!bookingData) return null;
 
@@ -283,7 +292,7 @@ export default function BookingModal({
                 Confirmed & Paid
               </span>
               <h3 className="text-2xl font-extrabold text-[#1A1C1E] mt-3">
-                Pack Your Bags, Alex!
+                Pack Your Bags, {user?.name || (guestName ? guestName.split(' ')[0] : 'Traveler')}!
               </h3>
               <p className="text-xs text-[#6A717A] max-w-xs mx-auto mt-1">
                 Your reservation at <span className="font-bold text-[#1A1C1E]">{destination.title}</span> has been confirmed.

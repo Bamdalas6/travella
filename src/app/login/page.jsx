@@ -25,17 +25,21 @@ export default function LoginPage() {
           <span>Back to Explore</span>
         </Link>
 
-        <div className="flex items-center gap-1.5 font-extrabold text-base tracking-tight text-[#1A1C1E]">
-          <div className="w-7 h-7 rounded-xl bg-[#387FAB] text-white flex items-center justify-center">
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 font-extrabold text-base tracking-tight text-[#1A1C1E] hover:opacity-80 transition-opacity"
+        >
+          <div className="w-7 h-7 rounded-xl bg-gradient-to-r from-[#387FAB] to-[#5B94BF] text-white flex items-center justify-center">
             <Compass className="w-4 h-4" />
           </div>
           <span>Travella</span>
-        </div>
+        </Link>
       </header>
 
       {/* Main Centered Login Card */}
       <main className="max-w-md mx-auto w-full my-auto py-4">
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E7E2] shadow-travella">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E7E2] shadow-travella relative overflow-hidden">
+          <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-[#387FAB] to-[#5B94BF]" />
           <AuthForm
             initialMode="login"
             onSuccess={handleSuccess}

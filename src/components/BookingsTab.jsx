@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CalendarCheck, Calendar, MapPin, Users, Ticket, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 export default function BookingsTab({
@@ -7,6 +7,17 @@ export default function BookingsTab({
   onShowToast
 }) {
   const [selectedBookingForPass, setSelectedBookingForPass] = useState(null);
+
+  useEffect(() => {
+    if (!selectedBookingForPass) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedBookingForPass(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedBookingForPass]);
 
   const handleDownloadPass = (booking) => {
     setSelectedBookingForPass(booking);
@@ -111,8 +122,14 @@ export default function BookingsTab({
 
       {/* Digital Pass Modal */}
       {selectedBookingForPass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-travella-lg border border-[#E8E7E2]">
+        <div
+          onClick={() => setSelectedBookingForPass(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-travella-lg border border-[#E8E7E2]"
+          >
             <div className="w-12 h-12 bg-[#E8F1F8] text-[#387FAB] rounded-full flex items-center justify-center mx-auto mb-3">
               <Ticket className="w-6 h-6" />
             </div>

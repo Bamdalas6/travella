@@ -34,7 +34,7 @@ export default function ProfileTab({ onShowToast }) {
   const activeProfile = user || {
     fullName: 'Guest Explorer',
     email: 'guest@travella.app',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+    avatar: null,
     membershipTier: 'Explorer Guest',
     savedTripsCount: 0,
     completedTripsCount: 0,
@@ -49,11 +49,17 @@ export default function ProfileTab({ onShowToast }) {
         <div className="absolute top-0 inset-x-0 h-20 bg-gradient-to-r from-[#387FAB] to-[#5B94BF]" />
 
         <div className="relative pt-6">
-          <img
-            src={activeProfile.avatar}
-            alt={activeProfile.fullName}
-            className="w-20 h-20 rounded-full mx-auto object-cover ring-4 ring-white shadow-md"
-          />
+          {activeProfile.avatar ? (
+            <img
+              src={activeProfile.avatar}
+              alt={activeProfile.fullName}
+              className="w-20 h-20 rounded-full mx-auto object-cover ring-4 ring-white shadow-md"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full mx-auto bg-[#E8F1F8] text-[#387FAB] flex items-center justify-center ring-4 ring-white shadow-md">
+              <User className="w-10 h-10" />
+            </div>
+          )}
           <h2 className="text-lg font-bold text-[#1A1C1E] mt-3">
             {activeProfile.fullName}
           </h2>

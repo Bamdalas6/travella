@@ -143,7 +143,7 @@ export default function App() {
   const handleBookingSuccess = (newBooking) => {
     const bookingWithUser = {
       ...newBooking,
-      guestName: user ? user.fullName : (newBooking.guestName || 'Alex Morgan')
+      guestName: newBooking.guestName || (user ? user.fullName : 'Alex Morgan')
     };
     setBookings([bookingWithUser, ...bookings]);
     showToast(`Booking ${newBooking.id} successfully reserved!`);
@@ -286,7 +286,7 @@ export default function App() {
               <BookingsTab
                 bookings={bookings.map((b) => ({
                   ...b,
-                  guestName: user ? user.fullName : (b.guestName || 'Alex Morgan')
+                  guestName: user ? (b.guestName === 'Alex Morgan' ? user.fullName : b.guestName) : b.guestName
                 }))}
                 onSelectDestination={(id) => setSelectedDestinationId(id)}
                 onShowToast={showToast}

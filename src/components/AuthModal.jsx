@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 import AuthForm from './AuthForm';
 import { useAuth } from '../context/AuthContext';
 
-export default function AuthModal({ isOpen, onClose, initialMode = 'login', onShowToast }) {
+export default function AuthModal({ isOpen, onClose, initialMode, onShowToast }) {
   const { isAuthModalOpen, authModalMode, closeAuthModal } = useAuth();
 
   const activeOpen = isOpen !== undefined ? isOpen : isAuthModalOpen;
@@ -56,6 +56,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login', onSh
         </button>
 
         <AuthForm
+          key={activeMode}
           initialMode={activeMode}
           onSuccess={handleSuccess}
           isModal={true}

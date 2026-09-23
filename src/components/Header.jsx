@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Sparkles, CheckCheck, X, LogIn, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -6,6 +6,7 @@ export default function Header({ onProfileClick, onSelectDestination }) {
   const { user, openAuthModal } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const notifRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -17,6 +18,27 @@ export default function Header({ onProfileClick, onSelectDestination }) {
       // ignore
     }
   }, []);
+
+  // Handle outside click & escape key to dismiss notifications
+  useEffect(() => {
+    if (!showNotifications) return;
+    const handleClickOutside = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showNotifications]);
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
@@ -52,12 +74,14 @@ export default function Header({ onProfileClick, onSelectDestination }) {
         {/* Action icons & Profile Avatar */}
         <div className="flex items-center gap-2.5">
           {/* Notification Bell */}
-          <div className="relative">
+          <div className="relative" ref={notifRef}>
             <button
               type="button"
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative p-2.5 rounded-full bg-white border border-[#E8E7E2] text-[#1A1C1E] hover:bg-[#F4F3EF] transition-all duration-200 shadow-sm active:scale-95"
               aria-label="Notifications"
+              aria-expanded={showNotifications}
+              aria-haspopup="true"
             >
               <Bell className="w-5 h-5 text-[#1A1C1E]" />
               {unreadCount > 0 && (
@@ -67,7 +91,11 @@ export default function Header({ onProfileClick, onSelectDestination }) {
 
             {/* Notifications Dropdown Modal */}
             {showNotifications && (
-              <div className="absolute right-0 mt-3 w-80 max-w-[90vw] bg-white rounded-2xl shadow-travella-lg border border-[#E8E7E2] p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
+              <div
+                role="region"
+                aria-label="Notifications panel"
+                className="absolute right-0 mt-3 w-80 max-w-[90vw] bg-white rounded-2xl shadow-travella-lg border border-[#E8E7E2] p-4 z-50 animate-in fade-in zoom-in-95 duration-150"
+              >
                 <div className="flex items-center justify-between pb-3 border-b border-[#F4F3EF]">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm text-[#1A1C1E]">Notifications</span>
@@ -106,7 +134,7 @@ export default function Header({ onProfileClick, onSelectDestination }) {
                     <div className="w-12 h-12 rounded-full bg-[#E8F1F8] text-[#387FAB] flex items-center justify-center mx-auto mb-3">
                       <Bell className="w-5 h-5 stroke-[1.8]" />
                     </div>
-                    <p className="text-xs font-bold text-[#1A1C1E]">No notifications yet</p>
+                    <p className="text-xs font-bold text-[#1A1C1E]">All Caught Up</p>
                     <p className="text-[11px] text-[#6A717A] mt-1 max-w-[220px] mx-auto leading-relaxed">
                       No notifications yet — Explore destinations to receive updates
                     </p>

@@ -15,29 +15,48 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+      const stored = localStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
         setUser(JSON.parse(stored));
       }
     } catch (e) {
-      console.error('Failed to read auth state from localStorage', e);
+      console.error('Failed to read auth state from storage', e);
     }
     setIsInitialized(true);
   }, []);
 
+  const persistUser = (userData, remember = true) => {
+    setUser(userData);
+    try {
+      if (remember) {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+        sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      } else {
+        sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      }
+    } catch (e) {
+      console.error('Failed to persist auth state', e);
+    }
+    setIsAuthModalOpen(false);
+  };
+
   const login = (credentials) => {
-    const { email, password, rememberMe } = credentials;
+    const { email, password, rememberMe = true } = credentials;
     let loggedInUser;
     if (!email || email.toLowerCase() === USER_PROFILE.email.toLowerCase() || email.toLowerCase().includes('alex')) {
       loggedInUser = { ...USER_PROFILE };
     } else {
-      const namePart = email.split('@')[0] || 'Traveler';
-      const displayName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+      const rawName = email.split('@')[0] || 'Traveler';
+      const cleanParts = rawName.split(/[._-]/).filter(Boolean);
+      const capitalizedParts = cleanParts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase());
+      const firstName = capitalizedParts[0] || 'Traveler';
+      const fullName = capitalizedParts.join(' ') || `${firstName} Traveler`;
       loggedInUser = {
-        name: displayName,
-        fullName: `${displayName} Traveler`,
-        email: email,
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+        name: firstName,
+        fullName: fullName,
+        email: email.trim(),
+        avatar: null,
         savedTripsCount: 0,
         completedTripsCount: 0,
         passportCountry: 'United States',
@@ -47,25 +66,19 @@ export function AuthProvider({ children }) {
       };
     }
 
-    setUser(loggedInUser);
-    try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(loggedInUser));
-    } catch (e) {
-      console.error('Failed to persist auth state', e);
-    }
-    setIsAuthModalOpen(false);
+    persistUser(loggedInUser, rememberMe);
     return loggedInUser;
   };
 
   const signup = (details) => {
-    const { fullName, email, password, rememberMe } = details;
+    const { fullName, email, password, rememberMe = true } = details;
     const trimmedName = (fullName || 'Traveler').trim();
     const firstName = trimmedName.split(' ')[0] || 'Traveler';
     const newUser = {
       name: firstName,
       fullName: trimmedName,
       email: email.trim(),
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80',
+      avatar: null,
       savedTripsCount: 0,
       completedTripsCount: 0,
       passportCountry: 'United States',
@@ -74,32 +87,37 @@ export function AuthProvider({ children }) {
       preferences: ['Scenic Views', 'Fast WiFi']
     };
 
-    setUser(newUser);
-    try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
-    } catch (e) {
-      console.error('Failed to persist auth state', e);
-    }
-    setIsAuthModalOpen(false);
+    persistUser(newUser, rememberMe);
     return newUser;
   };
 
   const demoLogin = () => {
     const demoUser = { ...USER_PROFILE };
-    setUser(demoUser);
-    try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(demoUser));
-    } catch (e) {
-      console.error('Failed to persist auth state', e);
-    }
-    setIsAuthModalOpen(false);
+    persistUser(demoUser, true);
     return demoUser;
+  };
+
+  const guestLogin = () => {
+    const guestUser = {
+      name: 'Guest',
+      fullName: 'Guest Explorer',
+      email: 'guest@travella.app',
+      avatar: null,
+      savedTripsCount: 0,
+      completedTripsCount: 0,
+      passportCountry: 'United States',
+      membershipTier: 'Explorer Guest',
+      points: '0 pts',
+      preferences: ['Scenic Views', 'Fast WiFi']
+    };
+    persistUser(guestUser, false);
+    return guestUser;
   };
 
   const socialLogin = (provider) => {
     const isGoogle = provider === 'google';
     const socialUser = {
-      name: isGoogle ? 'Alex' : 'Alex',
+      name: 'Alex',
       fullName: isGoogle ? 'Alex Morgan (Google)' : 'Alex Morgan (Apple)',
       email: isGoogle ? 'alex.morgan@gmail.com' : 'alex.morgan@icloud.com',
       avatar: USER_PROFILE.avatar,
@@ -111,13 +129,7 @@ export function AuthProvider({ children }) {
       preferences: USER_PROFILE.preferences
     };
 
-    setUser(socialUser);
-    try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(socialUser));
-    } catch (e) {
-      console.error('Failed to persist auth state', e);
-    }
-    setIsAuthModalOpen(false);
+    persistUser(socialUser, true);
     return socialUser;
   };
 
@@ -125,6 +137,7 @@ export function AuthProvider({ children }) {
     setUser(null);
     try {
       localStorage.removeItem(AUTH_STORAGE_KEY);
+      sessionStorage.removeItem(AUTH_STORAGE_KEY);
     } catch (e) {
       console.error('Failed to remove auth state', e);
     }
@@ -148,6 +161,7 @@ export function AuthProvider({ children }) {
         login,
         signup,
         demoLogin,
+        guestLogin,
         socialLogin,
         logout,
         isAuthModalOpen,
@@ -172,6 +186,7 @@ export function useAuth() {
       login: () => {},
       signup: () => {},
       demoLogin: () => {},
+      guestLogin: () => {},
       socialLogin: () => {},
       logout: () => {},
       isAuthModalOpen: false,

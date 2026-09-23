@@ -5,6 +5,9 @@ const outDir = path.resolve('out');
 const distDir = path.resolve('dist');
 
 if (fs.existsSync(outDir)) {
+  if (fs.existsSync(distDir)) {
+    fs.rmSync(distDir, { recursive: true, force: true });
+  }
   fs.mkdirSync(distDir, { recursive: true });
   fs.cpSync(outDir, distDir, { recursive: true });
   console.log('✅ Successfully mirrored out/ to dist/');

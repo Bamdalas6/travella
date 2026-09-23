@@ -131,13 +131,37 @@ assert(fs.existsSync('src/app/signup/page.jsx'), 'Dedicated /signup route page m
 // Check brand colors in AuthForm
 const authFormCode = fs.readFileSync('src/components/AuthForm.jsx', 'utf-8');
 assert(authFormCode.includes('#387FAB'), 'AuthForm must use Ocean Blue (#387FAB)');
+assert(authFormCode.includes('#5B94BF'), 'AuthForm must use primary accent Ocean Blue (#5B94BF)');
 assert(authFormCode.includes('#E8F1F8'), 'AuthForm must use soft card pill (#E8F1F8)');
 assert(authFormCode.includes('#1A1C1E'), 'AuthForm must use dark typography (#1A1C1E)');
+assert(authFormCode.includes('#6A717A'), 'AuthForm must use secondary text (#6A717A)');
 
-// Check in-app modal exists
+// Check in-app modal and accessibility
 assert(fs.existsSync('src/components/AuthModal.jsx'), 'In-app AuthModal component must exist');
+const authModalCode = fs.readFileSync('src/components/AuthModal.jsx', 'utf-8');
+assert(authModalCode.includes('aria-labelledby="auth-modal-title"'), 'AuthModal must contain aria-labelledby');
+assert(authFormCode.includes('id="auth-modal-title"'), 'AuthForm must contain id="auth-modal-title" matching aria-labelledby');
+
+// Check AuthModal does not shadow authModalMode with default param
+assert(!authModalCode.includes("initialMode = 'login'"), 'AuthModal must not default initialMode to login in param list, which shadows authModalMode');
 
 console.log('  ✅ Authentication logic, validation, dedicated routes, and brand color hierarchy verified');
 
-console.log('\n🎉 ALL 8 TEST SUITES PASSED CLEANLY!\n');
+// Test 9: State Synchronization Across the App (R3)
+console.log('\n9. Checking State Synchronization & Edge Cases Across Components:');
+const authContextCode = fs.readFileSync('src/context/AuthContext.jsx', 'utf-8');
+assert(authContextCode.includes('guestLogin'), 'AuthContext must export guestLogin for Guest quick login');
+assert(authContextCode.includes('demoLogin'), 'AuthContext must export demoLogin for Alex Morgan quick login');
+assert(authContextCode.includes('sessionStorage'), 'AuthContext must support non-persistent session storage when rememberMe is false');
+
+const bookingModalCode = fs.readFileSync('src/components/BookingModal.jsx', 'utf-8');
+assert(bookingModalCode.includes('useAuth'), 'BookingModal must connect to useAuth to synchronize active guest credentials');
+assert(!bookingModalCode.includes('Pack Your Bags, Alex!'), 'BookingModal confirmation must dynamically address active user, not hardcoded to Alex');
+
+const profileTabCode = fs.readFileSync('src/components/ProfileTab.jsx', 'utf-8');
+assert(profileTabCode.includes('activeProfile.avatar ?'), 'ProfileTab must gracefully handle null/guest avatar without broken image icon');
+
+console.log('  ✅ State synchronization across Header, BookingModal, and ProfileTab verified');
+
+console.log('\n🎉 ALL 9 TEST SUITES PASSED CLEANLY!\n');
 

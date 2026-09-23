@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, Check, ArrowRight } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Sparkles, Check, ArrowRight, Compass } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function AuthForm({
@@ -11,7 +11,7 @@ export default function AuthForm({
   showTitle = true,
   isModal = false
 }) {
-  const { login, signup, demoLogin, socialLogin } = useAuth();
+  const { login, signup, demoLogin, guestLogin, socialLogin } = useAuth();
   const [mode, setMode] = useState(initialMode); // 'login' | 'signup'
 
   // Form Fields
@@ -86,6 +86,11 @@ export default function AuthForm({
     if (onSuccess) onSuccess(demoUser);
   };
 
+  const handleGuestClick = () => {
+    const guestUser = guestLogin();
+    if (onSuccess) onSuccess(guestUser);
+  };
+
   const handleSocialClick = (provider) => {
     const socialUser = socialLogin(provider);
     if (onSuccess) onSuccess(socialUser);
@@ -99,7 +104,7 @@ export default function AuthForm({
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#E8F1F8] text-[#387FAB] mb-3">
             <Sparkles className="w-6 h-6 stroke-[1.8]" />
           </div>
-          <h2 className="text-2xl font-extrabold text-[#1A1C1E] tracking-tight">
+          <h2 id="auth-modal-title" className="text-2xl font-extrabold text-[#1A1C1E] tracking-tight">
             {mode === 'login' ? 'Welcome Back' : 'Create an Account'}
           </h2>
           <p className="text-xs text-[#6A717A] mt-1 max-w-xs mx-auto">
@@ -136,15 +141,23 @@ export default function AuthForm({
         </button>
       </div>
 
-      {/* Quick Demo Login Pill */}
-      <div className="mb-5">
+      {/* Quick Demo & Guest Login Pills */}
+      <div className="grid grid-cols-2 gap-2 mb-5">
         <button
           type="button"
           onClick={handleDemoClick}
-          className="w-full py-2.5 px-4 bg-[#E8F1F8] hover:bg-[#d8e8f5] text-[#387FAB] border border-[#387FAB]/20 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.99] shadow-xs"
+          className="py-2.5 px-3 bg-[#E8F1F8] hover:bg-[#d8e8f5] text-[#387FAB] border border-[#387FAB]/20 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-[0.99] shadow-xs"
         >
           <span className="text-sm">⚡</span>
-          <span>Quick Demo Login (Alex Morgan)</span>
+          <span>Demo (Alex)</span>
+        </button>
+        <button
+          type="button"
+          onClick={handleGuestClick}
+          className="py-2.5 px-3 bg-[#F8F7F4] hover:bg-[#F4F3EF] text-[#1A1C1E] border border-[#E8E7E2] rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-[0.99] shadow-xs"
+        >
+          <Compass className="w-3.5 h-3.5 text-[#387FAB]" />
+          <span>Guest Mode</span>
         </button>
       </div>
 
@@ -261,7 +274,16 @@ export default function AuthForm({
             </label>
           </div>
         ) : (
-          <div className="pt-1">
+          <div className="pt-1 space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 text-[#387FAB] border-[#E8E7E2] rounded focus:ring-[#387FAB]"
+              />
+              <span className="text-xs text-[#6A717A] font-medium">Remember me on this device</span>
+            </label>
             <label className="flex items-start gap-2 cursor-pointer select-none">
               <input
                 type="checkbox"
@@ -282,7 +304,7 @@ export default function AuthForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full py-3 px-4 bg-[#387FAB] hover:bg-[#2E698D] text-white rounded-2xl text-xs font-bold transition-all duration-200 shadow-travella-float active:scale-[0.99] flex items-center justify-center gap-1.5 mt-2"
+          className="w-full py-3 px-4 bg-gradient-to-r from-[#387FAB] to-[#5B94BF] hover:opacity-95 text-white rounded-2xl text-xs font-bold transition-all duration-200 shadow-travella-float active:scale-[0.99] flex items-center justify-center gap-1.5 mt-2"
         >
           <span>{mode === 'login' ? 'Sign In' : 'Create Account'}</span>
           <ArrowRight className="w-3.5 h-3.5" />
