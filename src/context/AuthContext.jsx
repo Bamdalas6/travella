@@ -29,7 +29,10 @@ export function AuthProvider({ children }) {
         localStorage.getItem(AUTH_STORAGE_KEY) ||
         sessionStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
-        setUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          setUser(parsed);
+        }
       }
     } catch (e) {
       console.error('Failed to read auth state from storage', e);
@@ -41,7 +44,12 @@ export function AuthProvider({ children }) {
       if (e.key === AUTH_STORAGE_KEY) {
         if (e.newValue) {
           try {
-            setUser(JSON.parse(e.newValue));
+            const parsed = JSON.parse(e.newValue);
+            if (parsed && typeof parsed === 'object') {
+              setUser(parsed);
+            } else {
+              setUser(null);
+            }
           } catch (err) {
             setUser(null);
           }
@@ -71,8 +79,8 @@ export function AuthProvider({ children }) {
     setIsAuthModalOpen(false);
   };
 
-  const login = (credentials) => {
-    const { email, password, rememberMe = true } = credentials;
+  const login = (credentials = {}) => {
+    const { email, password, rememberMe = true } = credentials || {};
     const cleanEmail = normalizeEmail(email);
     let loggedInUser;
 
@@ -83,7 +91,12 @@ export function AuthProvider({ children }) {
       let registeredMap = {};
       try {
         const storedMap = localStorage.getItem(REGISTERED_ACCOUNTS_KEY);
-        if (storedMap) registeredMap = JSON.parse(storedMap);
+        if (storedMap) {
+          const parsed = JSON.parse(storedMap);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            registeredMap = parsed;
+          }
+        }
       } catch (err) {
         // ignore
       }
@@ -99,8 +112,8 @@ export function AuthProvider({ children }) {
     return loggedInUser;
   };
 
-  const signup = (details) => {
-    const { fullName, email, password, rememberMe = true } = details;
+  const signup = (details = {}) => {
+    const { fullName, email, password, rememberMe = true } = details || {};
     const cleanEmail = normalizeEmail(email);
     const newUser = createUserFromSignup({ fullName, email: cleanEmail });
 
@@ -108,7 +121,12 @@ export function AuthProvider({ children }) {
     try {
       let registeredMap = {};
       const storedMap = localStorage.getItem(REGISTERED_ACCOUNTS_KEY);
-      if (storedMap) registeredMap = JSON.parse(storedMap);
+      if (storedMap) {
+        const parsed = JSON.parse(storedMap);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          registeredMap = parsed;
+        }
+      }
       registeredMap[cleanEmail] = newUser;
       localStorage.setItem(REGISTERED_ACCOUNTS_KEY, JSON.stringify(registeredMap));
     } catch (err) {

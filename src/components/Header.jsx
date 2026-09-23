@@ -12,7 +12,10 @@ export default function Header({ onProfileClick, onSelectDestination }) {
     try {
       const stored = localStorage.getItem('travella_notifications');
       if (stored) {
-        setNotifications(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          setNotifications(parsed);
+        }
       }
     } catch (e) {
       // ignore

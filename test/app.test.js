@@ -203,6 +203,15 @@ assert.strictEqual(signupUser.fullName, 'Sophia Davis', 'Signup should preserve 
 assert.strictEqual(signupUser.name, 'Sophia', 'Signup should extract first name');
 assert.strictEqual(signupUser.points, '500 pts', 'Signup user should receive 500 reward points');
 
+// Multiple whitespace collapsing in signup
+const multiSpaceSignup = createUserFromSignup({ fullName: '  Sophia   Davis  ', email: 'sophia@example.com' });
+assert.strictEqual(multiSpaceSignup.fullName, 'Sophia Davis', 'Multiple spaces in signup full name should be collapsed');
+
+// Empty or default createUserFromEmail should not duplicate Traveler
+const emptyEmailUser = createUserFromEmail('');
+assert.strictEqual(emptyEmailUser.name, 'Traveler');
+assert.strictEqual(emptyEmailUser.fullName, 'Traveler', 'Default email user should have clean single Traveler fullName');
+
 // Functional validation testing
 const validLogin = validateAuth({ mode: 'login', email: 'user@example.com', password: 'password123' });
 assert(validLogin.isValid, 'Valid login should pass validation');
@@ -214,6 +223,16 @@ assert(spaceEmailLogin.isValid, 'Email with leading/trailing spaces should pass 
 const shortPwd = validateAuth({ mode: 'login', email: 'user@example.com', password: '123' });
 assert(!shortPwd.isValid, 'Short password (<6) must fail validation');
 assert(shortPwd.errors.password, 'Must have password error');
+
+// Non-string password safety
+const numberPwd = validateAuth({ mode: 'login', email: 'user@example.com', password: 12345 });
+assert(!numberPwd.isValid, 'Non-string short password must fail validation without error');
+
+// Destructuring safety on empty call
+const emptyCall = validateAuth();
+assert(!emptyCall.isValid, 'Calling validateAuth() with no args should fail validation gracefully');
+const emptySignup = createUserFromSignup();
+assert.strictEqual(emptySignup.name, 'Traveler', 'Calling createUserFromSignup() with no args should return default Traveler');
 
 const signupMissingTerms = validateAuth({ mode: 'signup', fullName: 'Test User', email: 'test@example.com', password: 'password123', agreedToTerms: false });
 assert(!signupMissingTerms.isValid, 'Signup without terms must fail');
@@ -234,6 +253,32 @@ assert(appleUser.fullName.includes('Apple'));
 
 console.log('  ✅ Deep functional auth logic, trimming, validation, and user creation verified');
 
-console.log('\n🎉 ALL 10 TEST SUITES PASSED CLEANLY!\n');
+// Test 11: Modal Accessibility, ARIA Specifications, and Keyboard Navigation (R3)
+console.log('\n11. Checking Modal Accessibility, ARIA Specifications, and Keyboard Navigation (R3):');
+const filterModalCode = fs.readFileSync('src/components/FilterModal.jsx', 'utf-8');
+assert(filterModalCode.includes('role="dialog"'), 'FilterModal must have role="dialog"');
+assert(filterModalCode.includes('aria-modal="true"'), 'FilterModal must have aria-modal="true"');
+assert(filterModalCode.includes('aria-labelledby="filter-modal-title"'), 'FilterModal must have aria-labelledby');
+assert(filterModalCode.includes('id="filter-modal-title"'), 'FilterModal must have id="filter-modal-title"');
+assert(filterModalCode.includes("e.key === 'Escape'"), 'FilterModal must handle Escape key');
+assert(filterModalCode.includes('aria-label="Close filter modal"'), 'FilterModal close button must have aria-label');
+
+const bookingModalFileCode = fs.readFileSync('src/components/BookingModal.jsx', 'utf-8');
+assert(bookingModalFileCode.includes('role="dialog"'), 'BookingModal must have role="dialog"');
+assert(bookingModalFileCode.includes('aria-modal="true"'), 'BookingModal must have aria-modal="true"');
+assert(bookingModalFileCode.includes('aria-labelledby="booking-modal-title"'), 'BookingModal must have aria-labelledby');
+assert(bookingModalFileCode.includes('id="booking-modal-title"'), 'BookingModal must have id="booking-modal-title"');
+assert(bookingModalFileCode.includes("e.key === 'Escape'"), 'BookingModal must handle Escape key');
+assert(bookingModalFileCode.includes('aria-label="Close booking modal"'), 'BookingModal close button must have aria-label');
+
+const headerSafeCode = fs.readFileSync('src/components/Header.jsx', 'utf-8');
+assert(headerSafeCode.includes('Array.isArray(parsed)'), 'Header must verify Array.isArray for stored notifications');
+
+const authContextSafeCode = fs.readFileSync('src/context/AuthContext.jsx', 'utf-8');
+assert(authContextSafeCode.includes('!Array.isArray(parsed)'), 'AuthContext must protect registered accounts registry from corrupted non-object values');
+console.log('  ✅ Modal accessibility, ARIA compliance, and storage resilience verified');
+
+console.log('\n🎉 ALL 11 TEST SUITES PASSED CLEANLY!\n');
+
 
 

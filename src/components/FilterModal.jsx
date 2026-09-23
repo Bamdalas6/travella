@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Star, Check, RotateCcw } from 'lucide-react';
 import { CATEGORIES } from '../data/destinations';
 
@@ -22,6 +22,17 @@ export default function FilterModal({
   const [selectedCategory, setSelectedCategory] = useState(filters.category || 'all');
   const [minRating, setMinRating] = useState(filters.minRating || 0);
   const [selectedAmenities, setSelectedAmenities] = useState(filters.amenities || []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -51,13 +62,22 @@ export default function FilterModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-150">
-      <div className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-3xl max-h-[85vh] overflow-y-auto no-scrollbar shadow-travella-lg border border-[#E8E7E2]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="filter-modal-title"
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-150"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-3xl max-h-[85vh] overflow-y-auto no-scrollbar shadow-travella-lg border border-[#E8E7E2]"
+      >
         
         {/* Header */}
         <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-[#F4F3EF] flex items-center justify-between z-10">
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-[#1A1C1E]">Filters</h3>
+            <h3 id="filter-modal-title" className="text-base font-bold text-[#1A1C1E]">Filters</h3>
             <button
               onClick={handleReset}
               className="text-xs text-[#387FAB] hover:underline flex items-center gap-1 font-semibold ml-2"
@@ -68,6 +88,7 @@ export default function FilterModal({
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-[#F4F3EF] text-[#6A717A] hover:text-[#1A1C1E]"
+            aria-label="Close filter modal"
           >
             <X className="w-5 h-5" />
           </button>

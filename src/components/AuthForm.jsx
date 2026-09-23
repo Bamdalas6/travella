@@ -58,7 +58,7 @@ export default function AuthForm({
       if (mode === 'login') {
         loggedUser = login({ email: cleanEmail, password, rememberMe });
       } else {
-        loggedUser = signup({ fullName: fullName.trim(), email: cleanEmail, password, rememberMe });
+        loggedUser = signup({ fullName: fullName.trim().replace(/\s+/g, ' '), email: cleanEmail, password, rememberMe });
       }
       if (onSuccess) onSuccess(loggedUser);
     } catch (err) {
@@ -157,7 +157,7 @@ export default function AuthForm({
       </div>
 
       {errors.form && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
+        <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
           {errors.form}
         </div>
       )}
@@ -176,13 +176,14 @@ export default function AuthForm({
                 placeholder="e.g. Alex Morgan"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
+                aria-invalid={Boolean(errors.fullName)}
                 className={`w-full pl-10 pr-4 py-2.5 bg-white border ${
                   errors.fullName ? 'border-red-400' : 'border-[#E8E7E2]'
                 } rounded-xl text-xs text-[#1A1C1E] placeholder-[#8E95A0] focus:outline-none focus:ring-2 focus:ring-[#387FAB]/30 focus:border-[#387FAB] transition-all`}
               />
             </div>
             {errors.fullName && (
-              <p className="mt-1 text-[11px] text-red-500 font-medium">{errors.fullName}</p>
+              <p role="alert" className="mt-1 text-[11px] text-red-500 font-medium">{errors.fullName}</p>
             )}
           </div>
         )}
@@ -198,13 +199,14 @@ export default function AuthForm({
               placeholder="alex.morgan@travella.app"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={Boolean(errors.email)}
               className={`w-full pl-10 pr-4 py-2.5 bg-white border ${
                 errors.email ? 'border-red-400' : 'border-[#E8E7E2]'
               } rounded-xl text-xs text-[#1A1C1E] placeholder-[#8E95A0] focus:outline-none focus:ring-2 focus:ring-[#387FAB]/30 focus:border-[#387FAB] transition-all`}
             />
           </div>
           {errors.email && (
-            <p className="mt-1 text-[11px] text-red-500 font-medium">{errors.email}</p>
+            <p role="alert" className="mt-1 text-[11px] text-red-500 font-medium">{errors.email}</p>
           )}
         </div>
 
@@ -236,6 +238,7 @@ export default function AuthForm({
               placeholder="At least 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              aria-invalid={Boolean(errors.password)}
               className={`w-full pl-10 pr-10 py-2.5 bg-white border ${
                 errors.password ? 'border-red-400' : 'border-[#E8E7E2]'
               } rounded-xl text-xs text-[#1A1C1E] placeholder-[#8E95A0] focus:outline-none focus:ring-2 focus:ring-[#387FAB]/30 focus:border-[#387FAB] transition-all`}
@@ -250,7 +253,7 @@ export default function AuthForm({
             </button>
           </div>
           {errors.password && (
-            <p className="mt-1 text-[11px] text-red-500 font-medium">{errors.password}</p>
+            <p role="alert" className="mt-1 text-[11px] text-red-500 font-medium">{errors.password}</p>
           )}
         </div>
 
@@ -289,7 +292,7 @@ export default function AuthForm({
               </span>
             </label>
             {errors.terms && (
-              <p className="mt-1 text-[11px] text-red-500 font-medium">{errors.terms}</p>
+              <p role="alert" className="mt-1 text-[11px] text-red-500 font-medium">{errors.terms}</p>
             )}
           </div>
         )}

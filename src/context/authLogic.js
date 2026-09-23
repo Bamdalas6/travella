@@ -67,7 +67,7 @@ export function createUserFromEmail(email) {
   const fullName =
     capitalizedParts.length > 1
       ? capitalizedParts.join(' ')
-      : `${firstName} Traveler`;
+      : (firstName === 'Traveler' ? 'Traveler' : `${firstName} Traveler`);
 
   return {
     name: firstName,
@@ -83,10 +83,10 @@ export function createUserFromEmail(email) {
   };
 }
 
-export function createUserFromSignup(details) {
-  const { fullName, email } = details;
+export function createUserFromSignup(details = {}) {
+  const { fullName, email } = details || {};
   const cleanEmail = normalizeEmail(email);
-  const trimmedName = (fullName || 'Traveler').trim();
+  const trimmedName = (fullName || 'Traveler').trim().replace(/\s+/g, ' ') || 'Traveler';
   const firstName = trimmedName.split(' ')[0] || 'Traveler';
 
   return {
@@ -109,7 +109,7 @@ export function validateAuth({
   password = '',
   fullName = '',
   agreedToTerms = false
-}) {
+} = {}) {
   const errors = {};
   const cleanEmail = normalizeEmail(email);
 
@@ -119,14 +119,15 @@ export function validateAuth({
     errors.email = 'Please enter a valid email address';
   }
 
-  if (!password) {
+  const pwdStr = typeof password === 'string' ? password : String(password || '');
+  if (!pwdStr) {
     errors.password = 'Password is required';
-  } else if (password.length < 6) {
+  } else if (pwdStr.length < 6) {
     errors.password = 'Password must be at least 6 characters';
   }
 
   if (mode === 'signup') {
-    const trimmedName = (fullName || '').trim();
+    const trimmedName = (fullName || '').trim().replace(/\s+/g, ' ');
     if (!trimmedName || trimmedName.length < 2) {
       errors.fullName = 'Please enter your full name';
     }

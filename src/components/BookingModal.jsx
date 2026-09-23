@@ -24,6 +24,16 @@ export default function BookingModal({
     }
   }, [user]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && onClose) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!bookingData) return null;
 
   const { destination, nights, guestsCount, checkInDate, checkOutDate } = bookingData;
@@ -80,13 +90,22 @@ export default function BookingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-3xl max-h-[92vh] overflow-y-auto no-scrollbar shadow-travella-lg border border-[#E8E7E2]">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="booking-modal-title"
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg bg-white rounded-t-[2.5rem] sm:rounded-3xl max-h-[92vh] overflow-y-auto no-scrollbar shadow-travella-lg border border-[#E8E7E2]"
+      >
         
         {/* Header Bar */}
         <div className="sticky top-0 bg-white/95 backdrop-blur-md px-6 py-4 border-b border-[#F4F3EF] flex items-center justify-between z-10">
           <div>
-            <h3 className="text-base font-bold text-[#1A1C1E]">
+            <h3 id="booking-modal-title" className="text-base font-bold text-[#1A1C1E]">
               {step === 'confirmed' ? 'Booking Confirmed! 🎉' : 'Confirm & Reserve'}
             </h3>
             <p className="text-[11px] text-[#6A717A]">
@@ -96,6 +115,7 @@ export default function BookingModal({
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-[#F4F3EF] text-[#6A717A] hover:text-[#1A1C1E] transition-colors"
+            aria-label="Close booking modal"
           >
             <X className="w-5 h-5" />
           </button>
