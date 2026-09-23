@@ -145,6 +145,15 @@ export default function Header({ onProfileClick, onSelectDestination }) {
                       <div
                         key={item.id}
                         onClick={() => {
+                          if (item.unread) {
+                            const updated = notifications.map((n) =>
+                              n.id === item.id ? { ...n, unread: false } : n
+                            );
+                            setNotifications(updated);
+                            try {
+                              localStorage.setItem('travella_notifications', JSON.stringify(updated));
+                            } catch (e) {}
+                          }
                           if (item.destId && onSelectDestination) {
                             onSelectDestination(item.destId);
                             setShowNotifications(false);
@@ -191,6 +200,7 @@ export default function Header({ onProfileClick, onSelectDestination }) {
             onClick={user ? onProfileClick : () => openAuthModal('login')}
             className="relative rounded-full p-0.5 ring-2 ring-[#387FAB]/20 hover:ring-[#387FAB] transition-all duration-200 active:scale-95"
             title={user ? 'Open Profile' : 'Sign In'}
+            aria-label={user ? 'Open profile settings' : 'Sign in to Travella'}
           >
             {displayAvatar ? (
               <img

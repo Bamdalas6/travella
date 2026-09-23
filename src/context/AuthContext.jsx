@@ -1,11 +1,21 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { USER_PROFILE } from '../data/destinations';
+import {
+  AUTH_STORAGE_KEY,
+  REGISTERED_ACCOUNTS_KEY,
+  normalizeEmail,
+  isDemoAccount,
+  createDemoUser,
+  createGuestUser,
+  createSocialUser,
+  createUserFromEmail,
+  createUserFromSignup
+} from './authLogic';
 
 const AuthContext = createContext(null);
 
-export const AUTH_STORAGE_KEY = 'travella_auth_user';
+export { AUTH_STORAGE_KEY, REGISTERED_ACCOUNTS_KEY };
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -15,7 +25,9 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(AUTH_STORAGE_KEY) || sessionStorage.getItem(AUTH_STORAGE_KEY);
+      const stored =
+        localStorage.getItem(AUTH_STORAGE_KEY) ||
+        sessionStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
         setUser(JSON.parse(stored));
       }
@@ -23,6 +35,24 @@ export function AuthProvider({ children }) {
       console.error('Failed to read auth state from storage', e);
     }
     setIsInitialized(true);
+
+    // Cross-tab storage synchronization
+    const handleStorageChange = (e) => {
+      if (e.key === AUTH_STORAGE_KEY) {
+        if (e.newValue) {
+          try {
+            setUser(JSON.parse(e.newValue));
+          } catch (err) {
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   const persistUser = (userData, remember = true) => {
@@ -43,27 +73,26 @@ export function AuthProvider({ children }) {
 
   const login = (credentials) => {
     const { email, password, rememberMe = true } = credentials;
+    const cleanEmail = normalizeEmail(email);
     let loggedInUser;
-    if (!email || email.toLowerCase() === USER_PROFILE.email.toLowerCase() || email.toLowerCase().includes('alex')) {
-      loggedInUser = { ...USER_PROFILE };
+
+    if (isDemoAccount(cleanEmail)) {
+      loggedInUser = createDemoUser();
     } else {
-      const rawName = email.split('@')[0] || 'Traveler';
-      const cleanParts = rawName.split(/[._-]/).filter(Boolean);
-      const capitalizedParts = cleanParts.map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase());
-      const firstName = capitalizedParts[0] || 'Traveler';
-      const fullName = capitalizedParts.join(' ') || `${firstName} Traveler`;
-      loggedInUser = {
-        name: firstName,
-        fullName: fullName,
-        email: email.trim(),
-        avatar: null,
-        savedTripsCount: 0,
-        completedTripsCount: 0,
-        passportCountry: 'United States',
-        membershipTier: 'Travella Explorer Member',
-        points: '500 pts',
-        preferences: ['Scenic Views', 'Fast WiFi', 'Ocean Panorama']
-      };
+      // Check if user previously registered in this browser
+      let registeredMap = {};
+      try {
+        const storedMap = localStorage.getItem(REGISTERED_ACCOUNTS_KEY);
+        if (storedMap) registeredMap = JSON.parse(storedMap);
+      } catch (err) {
+        // ignore
+      }
+
+      if (registeredMap[cleanEmail]) {
+        loggedInUser = { ...registeredMap[cleanEmail] };
+      } else {
+        loggedInUser = createUserFromEmail(cleanEmail);
+      }
     }
 
     persistUser(loggedInUser, rememberMe);
@@ -72,63 +101,38 @@ export function AuthProvider({ children }) {
 
   const signup = (details) => {
     const { fullName, email, password, rememberMe = true } = details;
-    const trimmedName = (fullName || 'Traveler').trim();
-    const firstName = trimmedName.split(' ')[0] || 'Traveler';
-    const newUser = {
-      name: firstName,
-      fullName: trimmedName,
-      email: email.trim(),
-      avatar: null,
-      savedTripsCount: 0,
-      completedTripsCount: 0,
-      passportCountry: 'United States',
-      membershipTier: 'Travella Explorer Member',
-      points: '500 pts',
-      preferences: ['Scenic Views', 'Fast WiFi']
-    };
+    const cleanEmail = normalizeEmail(email);
+    const newUser = createUserFromSignup({ fullName, email: cleanEmail });
+
+    // Store in registered accounts registry for future login recall
+    try {
+      let registeredMap = {};
+      const storedMap = localStorage.getItem(REGISTERED_ACCOUNTS_KEY);
+      if (storedMap) registeredMap = JSON.parse(storedMap);
+      registeredMap[cleanEmail] = newUser;
+      localStorage.setItem(REGISTERED_ACCOUNTS_KEY, JSON.stringify(registeredMap));
+    } catch (err) {
+      // ignore
+    }
 
     persistUser(newUser, rememberMe);
     return newUser;
   };
 
   const demoLogin = () => {
-    const demoUser = { ...USER_PROFILE };
+    const demoUser = createDemoUser();
     persistUser(demoUser, true);
     return demoUser;
   };
 
   const guestLogin = () => {
-    const guestUser = {
-      name: 'Guest',
-      fullName: 'Guest Explorer',
-      email: 'guest@travella.app',
-      avatar: null,
-      savedTripsCount: 0,
-      completedTripsCount: 0,
-      passportCountry: 'United States',
-      membershipTier: 'Explorer Guest',
-      points: '0 pts',
-      preferences: ['Scenic Views', 'Fast WiFi']
-    };
+    const guestUser = createGuestUser();
     persistUser(guestUser, false);
     return guestUser;
   };
 
   const socialLogin = (provider) => {
-    const isGoogle = provider === 'google';
-    const socialUser = {
-      name: 'Alex',
-      fullName: isGoogle ? 'Alex Morgan (Google)' : 'Alex Morgan (Apple)',
-      email: isGoogle ? 'alex.morgan@gmail.com' : 'alex.morgan@icloud.com',
-      avatar: USER_PROFILE.avatar,
-      savedTripsCount: USER_PROFILE.savedTripsCount,
-      completedTripsCount: USER_PROFILE.completedTripsCount,
-      passportCountry: 'United States',
-      membershipTier: 'Travella Explorer Plus',
-      points: '14,850 pts',
-      preferences: USER_PROFILE.preferences
-    };
-
+    const socialUser = createSocialUser(provider);
     persistUser(socialUser, true);
     return socialUser;
   };

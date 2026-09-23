@@ -1,5 +1,15 @@
 import assert from 'node:assert';
 import { DESTINATIONS, CATEGORIES, USER_PROFILE } from '../src/data/destinations.js';
+import {
+  normalizeEmail,
+  isDemoAccount,
+  createDemoUser,
+  createGuestUser,
+  createSocialUser,
+  createUserFromEmail,
+  createUserFromSignup,
+  validateAuth
+} from '../src/context/authLogic.js';
 
 console.log('🧪 Running Travella Automated Tests...\n');
 
@@ -163,5 +173,67 @@ assert(profileTabCode.includes('activeProfile.avatar ?'), 'ProfileTab must grace
 
 console.log('  ✅ State synchronization across Header, BookingModal, and ProfileTab verified');
 
-console.log('\n🎉 ALL 9 TEST SUITES PASSED CLEANLY!\n');
+// Test 10: Deep Functional Auth Logic & Edge Cases (R3)
+console.log('\n10. Checking Functional Auth Logic & Edge Cases:');
+
+// Normalization & Whitespace trimming
+assert.strictEqual(normalizeEmail('  alex@travella.app  '), 'alex@travella.app', 'normalizeEmail should trim and lowercase');
+assert.strictEqual(normalizeEmail('ALEX.MORGAN@TRAVELLA.APP'), 'alex.morgan@travella.app', 'normalizeEmail should lowercase');
+assert.strictEqual(normalizeEmail(null), '', 'normalizeEmail should handle null gracefully');
+
+// Demo Account discrimination
+assert(isDemoAccount('alex'), 'alex should be recognized as demo account');
+assert(isDemoAccount('alex.morgan@travella.app'), 'alex.morgan@travella.app should be demo account');
+assert(isDemoAccount(''), 'empty email should default to demo account');
+assert(!isDemoAccount('alexander@gmail.com'), 'alexander@gmail.com must NOT be treated as Alex Morgan demo account');
+assert(!isDemoAccount('alexa@amazon.com'), 'alexa@amazon.com must NOT be treated as Alex Morgan demo account');
+
+// User creation from email
+const alexanderUser = createUserFromEmail('alexander@gmail.com');
+assert.strictEqual(alexanderUser.name, 'Alexander', 'User created from email should have capitalized name');
+assert.strictEqual(alexanderUser.email, 'alexander@gmail.com', 'User created from email should preserve email');
+
+const emmaWatsonUser = createUserFromEmail('emma.watson@travella.app');
+assert.strictEqual(emmaWatsonUser.fullName, 'Emma Watson', 'Dots in email prefix should resolve to full name');
+assert.strictEqual(emmaWatsonUser.name, 'Emma', 'First name should be extracted');
+
+// Signup user creation
+const signupUser = createUserFromSignup({ fullName: 'Sophia Davis', email: 'sophia.davis@example.com' });
+assert.strictEqual(signupUser.fullName, 'Sophia Davis', 'Signup should preserve exact full name');
+assert.strictEqual(signupUser.name, 'Sophia', 'Signup should extract first name');
+assert.strictEqual(signupUser.points, '500 pts', 'Signup user should receive 500 reward points');
+
+// Functional validation testing
+const validLogin = validateAuth({ mode: 'login', email: 'user@example.com', password: 'password123' });
+assert(validLogin.isValid, 'Valid login should pass validation');
+assert.strictEqual(Object.keys(validLogin.errors).length, 0);
+
+const spaceEmailLogin = validateAuth({ mode: 'login', email: '  user@example.com  ', password: 'password123' });
+assert(spaceEmailLogin.isValid, 'Email with leading/trailing spaces should pass validation after trimming');
+
+const shortPwd = validateAuth({ mode: 'login', email: 'user@example.com', password: '123' });
+assert(!shortPwd.isValid, 'Short password (<6) must fail validation');
+assert(shortPwd.errors.password, 'Must have password error');
+
+const signupMissingTerms = validateAuth({ mode: 'signup', fullName: 'Test User', email: 'test@example.com', password: 'password123', agreedToTerms: false });
+assert(!signupMissingTerms.isValid, 'Signup without terms must fail');
+assert(signupMissingTerms.errors.terms, 'Must have terms error');
+
+const signupValid = validateAuth({ mode: 'signup', fullName: 'Test User', email: 'test@example.com', password: 'password123', agreedToTerms: true });
+assert(signupValid.isValid, 'Valid signup should pass');
+
+// Guest & Social models
+const guest = createGuestUser();
+assert.strictEqual(guest.name, 'Guest');
+assert.strictEqual(guest.avatar, null);
+
+const googleUser = createSocialUser('google');
+assert(googleUser.fullName.includes('Google'));
+const appleUser = createSocialUser('apple');
+assert(appleUser.fullName.includes('Apple'));
+
+console.log('  ✅ Deep functional auth logic, trimming, validation, and user creation verified');
+
+console.log('\n🎉 ALL 10 TEST SUITES PASSED CLEANLY!\n');
+
 

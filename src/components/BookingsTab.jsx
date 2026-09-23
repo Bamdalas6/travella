@@ -123,6 +123,9 @@ export default function BookingsTab({
       {/* Digital Pass Modal */}
       {selectedBookingForPass && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="boarding-pass-title"
           onClick={() => setSelectedBookingForPass(null)}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150"
         >
@@ -133,7 +136,7 @@ export default function BookingsTab({
             <div className="w-12 h-12 bg-[#E8F1F8] text-[#387FAB] rounded-full flex items-center justify-center mx-auto mb-3">
               <Ticket className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-[#1A1C1E]">
+            <h3 id="boarding-pass-title" className="text-base font-bold text-[#1A1C1E]">
               Travella Mobile Boarding Pass
             </h3>
             <p className="text-xs text-[#6A717A] mt-1">

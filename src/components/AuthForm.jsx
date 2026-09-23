@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, Sparkles, Check, ArrowRight, Compass } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { validateAuth, normalizeEmail } from '../context/authLogic';
 
 export default function AuthForm({
   initialMode = 'login',
@@ -21,6 +22,7 @@ export default function AuthForm({
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   // Validation & Status
   const [errors, setErrors] = useState({});
@@ -29,36 +31,20 @@ export default function AuthForm({
   const handleTabSwitch = (newMode) => {
     setMode(newMode);
     setErrors({});
+    setResetSent(false);
     if (onModeChange) onModeChange(newMode);
   };
 
   const validate = () => {
-    const errs = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!email) {
-      errs.email = 'Email address is required';
-    } else if (!emailRegex.test(email)) {
-      errs.email = 'Please enter a valid email address';
-    }
-
-    if (!password) {
-      errs.password = 'Password is required';
-    } else if (password.length < 6) {
-      errs.password = 'Password must be at least 6 characters';
-    }
-
-    if (mode === 'signup') {
-      if (!fullName || fullName.trim().length < 2) {
-        errs.fullName = 'Please enter your full name';
-      }
-      if (!agreedToTerms) {
-        errs.terms = 'Please accept the Terms of Service';
-      }
-    }
-
+    const { isValid, errors: errs } = validateAuth({
+      mode,
+      email,
+      password,
+      fullName,
+      agreedToTerms
+    });
     setErrors(errs);
-    return Object.keys(errs).length === 0;
+    return isValid;
   };
 
   const handleSubmit = (e) => {
@@ -67,11 +53,12 @@ export default function AuthForm({
 
     setIsSubmitting(true);
     try {
+      const cleanEmail = normalizeEmail(email);
       let loggedUser;
       if (mode === 'login') {
-        loggedUser = login({ email, password, rememberMe });
+        loggedUser = login({ email: cleanEmail, password, rememberMe });
       } else {
-        loggedUser = signup({ fullName, email, password, rememberMe });
+        loggedUser = signup({ fullName: fullName.trim(), email: cleanEmail, password, rememberMe });
       }
       if (onSuccess) onSuccess(loggedUser);
     } catch (err) {
@@ -227,13 +214,19 @@ export default function AuthForm({
               Password
             </label>
             {mode === 'login' && (
-              <button
-                type="button"
-                onClick={() => alert('Password reset link has been dispatched to your email address.')}
-                className="text-[11px] font-semibold text-[#387FAB] hover:underline"
-              >
-                Forgot password?
-              </button>
+              resetSent ? (
+                <span className="text-[11px] font-semibold text-emerald-600">
+                  Reset link dispatched!
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setResetSent(true)}
+                  className="text-[11px] font-semibold text-[#387FAB] hover:underline"
+                >
+                  Forgot password?
+                </button>
+              )
             )}
           </div>
           <div className="relative">
