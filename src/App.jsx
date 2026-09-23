@@ -2,14 +2,11 @@
 
 import React, { useState } from 'react';
 import { DESTINATIONS } from './data/destinations';
-import DeviceFrame from './components/DeviceFrame';
-import StatusBar from './components/StatusBar';
 import Header from './components/Header';
 import SearchBar from './components/SearchBar';
 import CategoryChips from './components/CategoryChips';
 import FeaturedCard from './components/FeaturedCard';
 import DestinationCard from './components/DestinationCard';
-import SpecialOffers from './components/SpecialOffers';
 import DestinationDetails from './components/DestinationDetails';
 import BookingModal from './components/BookingModal';
 import FilterModal from './components/FilterModal';
@@ -31,7 +28,6 @@ export default function App() {
   const [savedIds, setSavedIds] = useState(['dest-1', 'dest-2']);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [isMobileView, setIsMobileView] = useState(true);
 
   // Filters State
   const [filterModalOpen, setFilterModalOpen] = useState(false);
@@ -153,67 +149,62 @@ export default function App() {
   const selectedDestination = destinations.find(d => d.id === selectedDestinationId);
 
   return (
-    <DeviceFrame isMobileView={isMobileView} onToggleView={setIsMobileView}>
-      {/* Active Toast Notification */}
-      <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+    <div className="min-h-screen bg-[#F4F3EF] flex justify-center text-[#1A1C1E] antialiased">
+      <div className="w-full max-w-md min-h-screen bg-[#F8F7F4] shadow-2xl flex flex-col relative sm:my-6 sm:rounded-[36px] sm:border sm:border-[#E8E7E2] overflow-hidden">
+        {/* Active Toast Notification */}
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
 
-      {/* Screen 2: Destination Details Screen (Full Screen View) */}
-      {selectedDestination ? (
-        <DestinationDetails
-          destination={selectedDestination}
-          onBack={() => setSelectedDestinationId(null)}
-          isSaved={savedIds.includes(selectedDestination.id)}
-          onToggleSave={handleToggleSave}
-          onBookNow={handleOpenBooking}
-          onShowToast={showToast}
-        />
-      ) : (
-        /* Screen 1 & Tabs View */
-        <div className="min-h-screen bg-[#F8F7F4] flex flex-col justify-between">
-          {/* Top Mobile Status Bar */}
-          <StatusBar dark={false} />
-
-          {/* Main Tab Views */}
-          <div className="flex-1 pb-24">
-            {activeTab === 'home' && (
-              <div className="animate-in fade-in duration-200">
-                {/* Header: Greeting & Profile */}
-                <Header
-                  onProfileClick={() => setActiveTab('profile')}
-                  onSelectDestination={(id) => setSelectedDestinationId(id)}
-                />
-
-                {/* Search & Filter Bar */}
-                <SearchBar
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  onOpenFilter={() => setFilterModalOpen(true)}
-                  activeFilterCount={activeFilterCount}
-                />
-
-                {/* Category Filter Chips */}
-                <CategoryChips
-                  selectedCategory={selectedCategory}
-                  onSelectCategory={(cat) => {
-                    setSelectedCategory(cat);
-                    setFilters(prev => ({ ...prev, category: cat }));
-                  }}
-                />
-
-                {/* Featured Destination Card (Large Hero Card) */}
-                {featuredDestination ? (
-                  <FeaturedCard
-                    destination={featuredDestination}
-                    onSelect={(id) => setSelectedDestinationId(id)}
-                    isSaved={savedIds.includes(featuredDestination.id)}
-                    onToggleSave={handleToggleSave}
+        {/* Screen 2: Destination Details Screen (Full Screen View) */}
+        {selectedDestination ? (
+          <DestinationDetails
+            destination={selectedDestination}
+            onBack={() => setSelectedDestinationId(null)}
+            isSaved={savedIds.includes(selectedDestination.id)}
+            onToggleSave={handleToggleSave}
+            onBookNow={handleOpenBooking}
+            onShowToast={showToast}
+          />
+        ) : (
+          /* Screen 1 & Tabs View */
+          <div className="min-h-screen bg-[#F8F7F4] flex flex-col justify-between">
+            {/* Main Tab Views */}
+            <div className="flex-1 pb-24">
+              {activeTab === 'home' && (
+                <div className="animate-in fade-in duration-200">
+                  {/* Header: Greeting & Profile */}
+                  <Header
+                    onProfileClick={() => setActiveTab('profile')}
+                    onSelectDestination={(id) => setSelectedDestinationId(id)}
                   />
-                ) : null}
 
-                {/* Special Offers Banner */}
-                <SpecialOffers onShowToast={showToast} />
+                  {/* Search & Filter Bar */}
+                  <SearchBar
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    onOpenFilter={() => setFilterModalOpen(true)}
+                    activeFilterCount={activeFilterCount}
+                  />
 
-                {/* Popular Destinations Section */}
+                  {/* Category Filter Chips */}
+                  <CategoryChips
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={(cat) => {
+                      setSelectedCategory(cat);
+                      setFilters(prev => ({ ...prev, category: cat }));
+                    }}
+                  />
+
+                  {/* Featured Destination Card (Large Hero Card) */}
+                  {featuredDestination ? (
+                    <FeaturedCard
+                      destination={featuredDestination}
+                      onSelect={(id) => setSelectedDestinationId(id)}
+                      isSaved={savedIds.includes(featuredDestination.id)}
+                      onToggleSave={handleToggleSave}
+                    />
+                  ) : null}
+
+                  {/* Popular Destinations Section */}
                 <div className="px-6 pt-3 pb-6">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="text-lg font-bold text-[#1A1C1E] tracking-tight">
@@ -333,6 +324,7 @@ export default function App() {
       />
       {/* Screen 4: Interactive In-App Authentication Modal */}
       <AuthModal onShowToast={showToast} />
-    </DeviceFrame>
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Sparkles, CheckCheck, X, LogIn, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { USER_PROFILE } from '../data/destinations';
 
 export default function Header({ onProfileClick, onSelectDestination }) {
   const { user, openAuthModal } = useAuth();
@@ -55,27 +56,25 @@ export default function Header({ onProfileClick, onSelectDestination }) {
     }
   };
 
-  const displayName = user?.name || 'Explorer';
-  const displayAvatar = user?.avatar;
+  const displayName = user ? (user.name || user.fullName?.split(' ')[0] || 'Alex') : 'Alex';
+  const displayAvatar = user?.avatar || USER_PROFILE.avatar;
 
   return (
-    <div className="relative px-6 pt-3 pb-4">
+    <div className="relative px-6 pt-5 pb-3">
       <div className="flex items-center justify-between">
-        {/* Greeting & Name */}
+        {/* Greeting & Name matching Instagram UI design */}
         <div>
           <p className="text-[13px] font-medium text-[#6A717A] tracking-normal">
-            {user ? 'Good morning,' : 'Welcome to Travella,'}
+            Good morning,
           </p>
           <h1 className="text-2xl sm:text-[26px] font-bold text-[#1A1C1E] tracking-tight flex items-center gap-1.5 mt-0.5">
             <span>{displayName}</span>
-            <span className="inline-block animate-bounce text-xl">
-              {user ? '👋' : '✈️'}
-            </span>
+            <span className="inline-block text-xl">👋</span>
           </h1>
         </div>
 
         {/* Action icons & Profile Avatar */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           {/* Notification Bell */}
           <div className="relative" ref={notifRef}>
             <button
@@ -184,26 +183,13 @@ export default function Header({ onProfileClick, onSelectDestination }) {
             )}
           </div>
 
-          {/* Auth Trigger Button & Profile Avatar */}
-          {!user ? (
-            <button
-              type="button"
-              onClick={() => openAuthModal('login')}
-              className="px-3 py-1.5 bg-[#387FAB] hover:bg-[#2E698D] text-white rounded-full text-xs font-bold transition-all duration-200 shadow-sm active:scale-95 flex items-center gap-1"
-              title="Sign In to your account"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Sign In</span>
-            </button>
-          ) : null}
-
           {/* Profile Avatar Button */}
           <button
             type="button"
-            onClick={user ? onProfileClick : () => openAuthModal('login')}
+            onClick={onProfileClick}
             className="relative rounded-full p-0.5 ring-2 ring-[#387FAB]/20 hover:ring-[#387FAB] transition-all duration-200 active:scale-95"
-            title={user ? 'Open Profile' : 'Sign In'}
-            aria-label={user ? 'Open profile settings' : 'Sign in to Travella'}
+            title="Profile"
+            aria-label="Open profile settings"
           >
             {displayAvatar ? (
               <img

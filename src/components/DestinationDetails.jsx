@@ -24,7 +24,6 @@ import {
   Minus,
   MessageSquare
 } from 'lucide-react';
-import StatusBar from './StatusBar';
 
 const iconMap = {
   Wifi,
@@ -98,11 +97,6 @@ export default function DestinationDetails({
 
   return (
     <div className="relative min-h-screen bg-[#F8F7F4] pb-28 text-[#1A1C1E]">
-      {/* Top Mobile Status Bar (over photo) */}
-      <div className="absolute top-0 inset-x-0 z-30 pointer-events-none">
-        <StatusBar dark={true} />
-      </div>
-
       {/* Hero Cover Image & Floating Actions */}
       <div className="relative w-full h-[380px] sm:h-[440px] bg-black">
         <img
@@ -115,7 +109,7 @@ export default function DestinationDetails({
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/30 pointer-events-none" />
 
         {/* Floating Top Controls */}
-        <div className="absolute top-12 inset-x-5 flex items-center justify-between z-20">
+        <div className="absolute top-5 inset-x-5 flex items-center justify-between z-20">
           {/* Back Button */}
           <button
             type="button"
