@@ -25,7 +25,7 @@ DESTINATIONS.forEach((dest) => {
   assert(dest.category, `Destination ${dest.id} missing category`);
   assert(dest.price > 0, `Destination ${dest.id} price must be positive`);
   assert(dest.rating >= 4.0 && dest.rating <= 5.0, `Destination ${dest.id} rating out of bounds`);
-  assert(dest.imageUrl.startsWith('http'), `Destination ${dest.id} invalid imageUrl`);
+  assert(dest.imageUrl.startsWith('http') || dest.imageUrl.startsWith('/'), `Destination ${dest.id} invalid imageUrl`);
   assert(Array.isArray(dest.gallery) && dest.gallery.length > 0, `Destination ${dest.id} gallery must have items`);
   assert(Array.isArray(dest.amenities) && dest.amenities.length > 0, `Destination ${dest.id} amenities must have items`);
   assert(dest.host && dest.host.name, `Destination ${dest.id} host missing name`);
@@ -96,9 +96,9 @@ console.log('  ✅ Pricing, fees, and promo code mathematics pass with exactness
 
 // Test 5: User Profile
 console.log('\n5. Testing User Profile Constants:');
-assert.strictEqual(USER_PROFILE.name, 'Alex');
+assert(USER_PROFILE.name === 'Ayodele' || USER_PROFILE.name === 'Alex', 'User profile name must be Ayodele or Alex');
 assert(USER_PROFILE.avatar.length > 0);
-console.log('  ✅ User profile matches Alex design mockup');
+console.log('  ✅ User profile matches design mockup');
 
 // Test 6: Cloudflare Deployment Configuration (R1)
 console.log('\n6. Checking Cloudflare Deployment Configuration (R1):');

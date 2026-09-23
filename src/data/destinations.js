@@ -62,6 +62,90 @@ export const DESTINATIONS = [
     ]
   },
   {
+    id: "dest-tanah-lot",
+    title: "Tanah Lot",
+    location: "Bangladesh, Bali",
+    distance: "12 Km from you",
+    country: "Bali",
+    category: "Beach",
+    isFeatured: true,
+    isPopular: true,
+    isTrending: true,
+    rating: 4.7,
+    reviewsCount: 142,
+    price: 50,
+    discountPrice: 50,
+    imageUrl: "/tanah_lot.png",
+    gallery: [
+      "/tanah_lot.png",
+      "/kudahuvadhoo_hero.png",
+      "/onboarding_hero.png"
+    ],
+    description: "Tanah Lot is an iconic rock formation home to the ancient pilgrimage temple Pura Tanah Lot. Perched offshore amid rolling ocean tides, it offers one of the most stunning sunset panoramas and spiritual cultural sanctuaries in Bali.",
+    amenities: [
+      { id: "wifi", name: "High-Speed WiFi", icon: "Wifi" },
+      { id: "pool", name: "Oceanfront Pool", icon: "Waves" },
+      { id: "breakfast", name: "Tropical Breakfast", icon: "Coffee" },
+      { id: "view", name: "Sunset Panorama", icon: "Eye" }
+    ],
+    host: {
+      name: "Wayan Surya",
+      role: "Island Host · 6 yrs hosting",
+      avatar: "/ayodele_avatar.png",
+      responseRate: "100%",
+      responseTime: "Within 5 mins"
+    },
+    specs: {
+      guests: 2,
+      bedrooms: 1,
+      beds: 1,
+      baths: 1
+    },
+    reviews: []
+  },
+  {
+    id: "dest-kudahuvadhoo",
+    title: "Kudahuvadhoo Island",
+    location: "Bangladesh, Bali",
+    distance: "37 Km from you",
+    country: "Bali",
+    category: "Beach",
+    isFeatured: true,
+    isPopular: true,
+    isTrending: true,
+    rating: 5.0,
+    reviewsCount: 37,
+    price: 50,
+    discountPrice: 50,
+    imageUrl: "/kudahuvadhoo_hero.png",
+    gallery: [
+      "/kudahuvadhoo_hero.png",
+      "/onboarding_hero.png",
+      "/tanah_lot.png"
+    ],
+    description: "Is a mountain king Christion Ix Land, Sermersooq Municipality, Greenland. It is part of the Schweizerland, an extraordinary coastal lagoon paradise featuring turquoise waters, private wooden longtail boats, and lush tropical limestone formations.",
+    amenities: [
+      { id: "wifi", name: "High-Speed WiFi", icon: "Wifi" },
+      { id: "pool", name: "Lagoon Haven", icon: "Waves" },
+      { id: "breakfast", name: "Fresh Breakfast", icon: "Coffee" },
+      { id: "view", name: "Karst Panorama", icon: "Eye" }
+    ],
+    host: {
+      name: "Ayodele Babalola",
+      role: "Superhost · 4 yrs hosting",
+      avatar: "/ayodele_avatar.png",
+      responseRate: "100%",
+      responseTime: "Within 2 mins"
+    },
+    specs: {
+      guests: 3,
+      bedrooms: 1,
+      beds: 2,
+      baths: 1
+    },
+    reviews: []
+  },
+  {
     id: "dest-2",
     title: "Santorini Azure Horizon Villa",
     location: "Oia, Santorini, Greece",
@@ -405,15 +489,24 @@ export const CATEGORIES = [
   { id: "luxury", label: "Luxury", icon: "Sparkles" },
 ];
 
+export const EXPLORE_COUNTRIES = [
+  { id: "india", name: "India", imageUrl: "/country_india.png" },
+  { id: "pakistan", name: "Pakistan", imageUrl: "/country_pakistan.png" },
+  { id: "china", name: "China", imageUrl: "/country_china.png" },
+  { id: "italy", name: "Italy", imageUrl: "/country_italy.png" },
+  { id: "bali", name: "Bali", imageUrl: "/tanah_lot.png" },
+];
+
 export const USER_PROFILE = {
-  name: "Alex",
-  fullName: "Alex Morgan",
-  email: "alex.morgan@travella.app",
-  avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+  name: "Ayodele",
+  fullName: "Ayodele Babalola",
+  email: "hello@bamdalas.com",
+  avatar: "/ayodele_avatar.png",
   savedTripsCount: 12,
   completedTripsCount: 8,
-  passportCountry: "United States",
-  membershipTier: "Travella Explorer Plus",
+  passportCountry: "Nigeria",
+  membershipTier: "Travella Premium Member",
   points: "14,850 pts",
-  preferences: ["Scenic Views", "Private Pools", "Gourmet Breakfast", "Fast WiFi"]
+  preferences: ["Tropical Islands", "Scenic Karsts", "Beach Escapes", "Private Boats"]
 };
+

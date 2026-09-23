@@ -4,39 +4,13 @@ import {
   Heart,
   Star,
   MapPin,
-  Share2,
-  Users,
-  Bed,
-  Bath,
-  Wifi,
-  Waves,
-  Coffee,
-  Wind,
-  Eye,
-  Car,
-  Sparkles,
-  Flame,
   Compass,
-  Wine,
-  CheckCircle2,
   Calendar,
   Plus,
   Minus,
-  MessageSquare
+  CheckCircle2,
+  Share2
 } from 'lucide-react';
-
-const iconMap = {
-  Wifi,
-  Waves,
-  Coffee,
-  Wind,
-  Eye,
-  Car,
-  Sparkles,
-  Flame,
-  Compass,
-  Wine
-};
 
 export default function DestinationDetails({
   destination,
@@ -46,7 +20,6 @@ export default function DestinationDetails({
   onBookNow,
   onShowToast
 }) {
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [guestsCount, setGuestsCount] = useState(2);
   const [checkInDate, setCheckInDate] = useState(() => {
@@ -59,8 +32,6 @@ export default function DestinationDetails({
     nextWeek.setDate(nextWeek.getDate() + 11);
     return nextWeek.toISOString().split('T')[0];
   });
-  const [hostMessageOpen, setHostMessageOpen] = useState(false);
-  const [hostMessageText, setHostMessageText] = useState('');
 
   if (!destination) return null;
 
@@ -68,15 +39,15 @@ export default function DestinationDetails({
   const dIn = new Date(checkInDate);
   const dOut = new Date(checkOutDate);
   const diffTime = Math.max(1, Math.round((dOut - dIn) / (1000 * 60 * 60 * 24)));
-  const nights = isNaN(diffTime) || diffTime <= 0 ? 4 : diffTime;
-  const pricePerNight = destination.discountPrice || destination.price;
-  const totalPrice = pricePerNight * nights;
+  const nights = isNaN(diffTime) || diffTime <= 0 ? 1 : diffTime;
+  const pricePerDay = destination.discountPrice || destination.price || 50;
+  const totalPrice = pricePerDay * nights;
 
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
         title: destination.title,
-        text: `Look at this incredible place on Travella: ${destination.title} in ${destination.location}`,
+        text: `Look at this incredible place on Travella: ${destination.title}`,
         url: window.location.href,
       }).catch(() => {});
     } else {
@@ -85,361 +56,190 @@ export default function DestinationDetails({
     }
   };
 
-  const handleSendHostMessage = (e) => {
-    e.preventDefault();
-    if (!hostMessageText.trim()) return;
-    setHostMessageOpen(false);
-    setHostMessageText('');
-    if (onShowToast) onShowToast(`Message sent to ${destination.host?.name || 'host'}!`);
-  };
-
   const gallery = destination.gallery || [destination.imageUrl];
 
   return (
-    <div className="relative min-h-screen bg-[#F8F7F4] pb-28 text-[#1A1C1E]">
-      {/* Hero Cover Image & Floating Actions */}
-      <div className="relative w-full h-[380px] sm:h-[440px] bg-black">
+    <div className="relative min-h-screen bg-white pb-32 text-[#1A1C1E]">
+      {/* Top Hero Image Card with rounded bottom */}
+      <div className="relative w-full aspect-[4/4] sm:aspect-[4/3] rounded-b-[2.5rem] overflow-hidden bg-black shadow-sm">
         <img
-          src={gallery[activeImageIndex]}
+          src={gallery[0]}
           alt={destination.title}
-          className="w-full h-full object-cover transition-opacity duration-300"
+          className="w-full h-full object-cover"
         />
 
-        {/* Top Vignette Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/30 pointer-events-none" />
-
-        {/* Floating Top Controls */}
+        {/* Floating Top Controls matching Screen 3 */}
         <div className="absolute top-5 inset-x-5 flex items-center justify-between z-20">
           {/* Back Button */}
           <button
             type="button"
             onClick={onBack}
-            className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-md text-[#1A1C1E] flex items-center justify-center shadow-lg hover:bg-white active:scale-90 transition-all duration-200"
-            aria-label="Back to discovery"
+            className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-md text-[#1A1C1E] flex items-center justify-center shadow-md hover:bg-white active:scale-90 transition-all duration-200"
+            aria-label="Back"
           >
-            <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
+            <ArrowLeft className="w-5 h-5 stroke-[2.2]" />
           </button>
 
-          {/* Right Floating Actions (Share & Favorite) */}
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={handleShare}
-              className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-md text-[#1A1C1E] flex items-center justify-center shadow-lg hover:bg-white active:scale-90 transition-all duration-200"
-              aria-label="Share"
-            >
-              <Share2 className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onToggleSave(destination.id)}
-              className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg hover:bg-white active:scale-90 transition-all duration-200"
-              aria-label={isSaved ? "Remove from saved" : "Save destination"}
-            >
-              <Heart
-                className={`w-5 h-5 transition-colors ${
-                  isSaved ? 'fill-rose-500 text-rose-500' : 'text-[#1A1C1E]'
-                }`}
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Image Gallery Dots / Thumbnails */}
-        {gallery.length > 1 && (
-          <div className="absolute bottom-6 inset-x-0 flex items-center justify-center gap-2 z-20">
-            {gallery.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setActiveImageIndex(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  activeImageIndex === idx ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Main Content Sheet with rounded top */}
-      <div className="relative -mt-6 bg-[#F8F7F4] rounded-t-[2.25rem] px-6 pt-6 z-20">
-        {/* Title, Location & Rating Row */}
-        <div>
-          <div className="flex items-center gap-2 text-xs text-[#6A717A] font-semibold mb-1.5">
-            <div className="flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-[#387FAB]" />
-              <span>{destination.location}</span>
-            </div>
-            <span>•</span>
-            <span className="text-[#387FAB] bg-[#E8F1F8] px-2 py-0.5 rounded-full text-[11px] font-bold">
-              {destination.category}
-            </span>
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#1A1C1E] tracking-tight leading-tight">
-            {destination.title}
-          </h1>
-
-          {/* Rating and Reviews Badge */}
-          <div className="flex items-center gap-3 mt-3 pb-4 border-b border-[#E8E7E2]">
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E8E7E2] rounded-full shadow-xs text-xs font-bold text-[#1A1C1E]">
-              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-              <span>{destination.rating}</span>
-            </div>
-            <span className="text-xs text-[#6A717A] font-medium">
-              ({destination.reviewsCount} verified reviews)
-            </span>
-            <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-md flex items-center gap-1">
-              <CheckCircle2 className="w-3 h-3" /> Top 1% Pick
-            </span>
-          </div>
-        </div>
-
-        {/* Specifications Pill Bar (Guests, Beds, Baths) */}
-        {destination.specs && (
-          <div className="grid grid-cols-3 gap-3 my-4">
-            <div className="bg-white p-3 rounded-2xl border border-[#E8E7E2] flex items-center gap-2.5 shadow-xs">
-              <div className="w-8 h-8 rounded-xl bg-[#E8F1F8] flex items-center justify-center text-[#387FAB]">
-                <Users className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-[10px] text-[#8E95A0] block">Capacity</span>
-                <span className="text-xs font-bold text-[#1A1C1E]">{destination.specs.guests} Guests</span>
-              </div>
-            </div>
-
-            <div className="bg-white p-3 rounded-2xl border border-[#E8E7E2] flex items-center gap-2.5 shadow-xs">
-              <div className="w-8 h-8 rounded-xl bg-[#E8F1F8] flex items-center justify-center text-[#387FAB]">
-                <Bed className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-[10px] text-[#8E95A0] block">Bedrooms</span>
-                <span className="text-xs font-bold text-[#1A1C1E]">{destination.specs.bedrooms} Beds</span>
-              </div>
-            </div>
-
-            <div className="bg-white p-3 rounded-2xl border border-[#E8E7E2] flex items-center gap-2.5 shadow-xs">
-              <div className="w-8 h-8 rounded-xl bg-[#E8F1F8] flex items-center justify-center text-[#387FAB]">
-                <Bath className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="text-[10px] text-[#8E95A0] block">Bathrooms</span>
-                <span className="text-xs font-bold text-[#1A1C1E]">{destination.specs.baths} Baths</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Key Feature Pills */}
-        <div className="my-5">
-          <h2 className="text-sm font-bold text-[#1A1C1E] mb-3 uppercase tracking-wider text-[11px] text-[#8E95A0]">
-            Featured Amenities
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {destination.amenities?.map((amenity) => {
-              const AmenityIcon = iconMap[amenity.icon] || Sparkles;
-              return (
-                <div
-                  key={amenity.id}
-                  className="flex items-center gap-2 px-3.5 py-2 bg-white border border-[#E8E7E2] rounded-full text-xs font-semibold text-[#1A1C1E] shadow-xs"
-                >
-                  <AmenityIcon className="w-3.5 h-3.5 text-[#387FAB]" />
-                  <span>{amenity.name}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* About Section */}
-        <div className="my-5 bg-white p-4 rounded-3xl border border-[#E8E7E2] shadow-xs">
-          <h2 className="text-sm font-bold text-[#1A1C1E] mb-2">About this stay</h2>
-          <p className={`text-xs text-[#6A717A] leading-relaxed ${!isExpanded ? 'line-clamp-3' : ''}`}>
-            {destination.description}
-          </p>
+          {/* Right Heart Button */}
           <button
             type="button"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-2 text-xs font-bold text-[#387FAB] hover:underline inline-flex items-center gap-1"
+            onClick={() => onToggleSave(destination.id)}
+            className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-md hover:bg-white active:scale-90 transition-all duration-200"
+            aria-label={isSaved ? "Remove from saved" : "Save destination"}
           >
-            {isExpanded ? 'Show less' : 'Read more'}
+            <Heart
+              className={`w-5 h-5 transition-colors ${
+                isSaved ? 'fill-rose-500 text-rose-500' : 'fill-rose-500 text-rose-500'
+              }`}
+            />
           </button>
         </div>
+      </div>
 
-        {/* Date Selector & Guest Counter Box */}
-        <div className="my-5 bg-white p-4 rounded-3xl border border-[#E8E7E2] shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-[#F4F3EF]">
-            <span className="text-xs font-bold text-[#1A1C1E] flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-[#387FAB]" />
-              Trip Dates & Guests
-            </span>
-            <span className="text-xs font-semibold text-[#387FAB] bg-[#E8F1F8] px-2.5 py-0.5 rounded-full">
-              {nights} nights
-            </span>
+      {/* Content Section */}
+      <div className="px-6 pt-5">
+        {/* Title */}
+        <h1 className="text-xl sm:text-2xl font-extrabold text-[#1A1C1E] tracking-tight">
+          {destination.title}
+        </h1>
+
+        {/* Location & Distance Pills */}
+        <div className="flex flex-wrap items-center gap-2.5 mt-3">
+          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#F2F6F4] text-xs font-medium text-[#1A1C1E]">
+            <MapPin className="w-3.5 h-3.5 text-[#037c66]" />
+            <span>{destination.location}</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#F2F6F4] text-xs font-medium text-[#1A1C1E]">
+            <Compass className="w-3.5 h-3.5 text-[#037c66]" />
+            <span>{destination.distance || "37 Km from you"}</span>
+          </div>
+        </div>
+
+        {/* Rating and Attendees Row */}
+        <div className="flex items-center justify-between mt-5 py-2">
+          <div>
+            <span className="text-sm font-bold text-[#1A1C1E] block">
+              {destination.rating || 5.0} Review
+            </span>
+            <div className="flex items-center gap-0.5 mt-1">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              ))}
+            </div>
+          </div>
+
+          {/* Social Proof Avatars Stack */}
+          <div className="flex items-center">
+            <img
+              src="/ayodele_avatar.png"
+              alt="Visitor"
+              className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-xs"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+              alt="Visitor"
+              className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-xs -ml-2.5"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
+              alt="Visitor"
+              className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-xs -ml-2.5"
+            />
+            <div className="w-8 h-8 rounded-full bg-[#037c66] text-white text-[11px] font-bold flex items-center justify-center border-2 border-white -ml-2.5 shadow-xs">
+              +{destination.reviewsCount || 37}
+            </div>
+          </div>
+        </div>
+
+        {/* Description Section */}
+        <div className="mt-5">
+          <h2 className="text-sm font-bold text-[#1A1C1E] mb-2">
+            Description
+          </h2>
+          <p className="text-xs text-[#6A717A] leading-relaxed">
+            {isExpanded
+              ? (destination.description || "Is a mountain king Christion Ix Land, Sermersooq Municipality, Greenland. It is part of the Schweizerland, an extraordinary coastal lagoon paradise featuring turquoise waters, private wooden longtail boats, and lush tropical limestone formations.")
+              : ((destination.description?.slice(0, 140) || "Is a mountain king Christion Ix Land, Sermersooq Municipality, Greenland. It is part of the Schweizerland") + "...")}
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="ml-1 text-xs font-bold text-[#037c66] hover:underline"
+            >
+              {isExpanded ? "See Less" : "See More"}
+            </button>
+          </p>
+        </div>
+
+        {/* Date Selector & Guest Counter */}
+        <div className="mt-6 p-4 rounded-3xl bg-[#F8FAF9] border border-[#EAEFEC] space-y-3">
+          <div className="flex items-center justify-between text-xs font-semibold text-[#1A1C1E]">
+            <span className="flex items-center gap-1.5">
+              <Calendar className="w-4 h-4 text-[#037c66]" />
+              <span>Travel Dates</span>
+            </span>
+            <span className="text-[#037c66]">{nights} {nights === 1 ? 'day' : 'days'}</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
             <div>
-              <label className="text-[11px] font-semibold text-[#8E95A0] block mb-1">
-                Check-in
-              </label>
+              <span className="text-[10px] text-[#8E95A0] block mb-1">Check-in</span>
               <input
                 type="date"
                 value={checkInDate}
                 onChange={(e) => setCheckInDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#F8F7F4] border border-[#E8E7E2] rounded-xl text-xs font-bold text-[#1A1C1E] focus:outline-none focus:border-[#387FAB]"
+                className="w-full bg-white p-2.5 rounded-xl border border-[#EAEFEC] text-xs font-medium text-[#1A1C1E] focus:outline-none focus:border-[#037c66]"
               />
             </div>
             <div>
-              <label className="text-[11px] font-semibold text-[#8E95A0] block mb-1">
-                Check-out
-              </label>
+              <span className="text-[10px] text-[#8E95A0] block mb-1">Check-out</span>
               <input
                 type="date"
                 value={checkOutDate}
                 onChange={(e) => setCheckOutDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#F8F7F4] border border-[#E8E7E2] rounded-xl text-xs font-bold text-[#1A1C1E] focus:outline-none focus:border-[#387FAB]"
+                className="w-full bg-white p-2.5 rounded-xl border border-[#EAEFEC] text-xs font-medium text-[#1A1C1E] focus:outline-none focus:border-[#037c66]"
               />
             </div>
           </div>
 
-          {/* Guest Counter */}
-          <div className="flex items-center justify-between pt-1">
-            <div>
-              <span className="text-xs font-bold text-[#1A1C1E] block">Guests</span>
-              <span className="text-[11px] text-[#8E95A0]">Ages 13 and above</span>
-            </div>
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between pt-2 border-t border-[#EAEFEC]">
+            <span className="text-xs font-semibold text-[#1A1C1E]">Guests</span>
+            <div className="flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={() => setGuestsCount(Math.max(1, guestsCount - 1))}
-                className="w-8 h-8 rounded-full border border-[#E8E7E2] bg-[#F8F7F4] flex items-center justify-center text-[#1A1C1E] hover:bg-[#E8E7E2] active:scale-90 transition-all"
-                disabled={guestsCount <= 1}
+                className="w-7 h-7 rounded-full bg-white border border-[#EAEFEC] flex items-center justify-center text-[#1A1C1E] active:scale-95"
               >
                 <Minus className="w-3.5 h-3.5" />
               </button>
-              <span className="text-sm font-bold text-[#1A1C1E] w-4 text-center">
-                {guestsCount}
-              </span>
+              <span className="text-xs font-bold text-[#1A1C1E] w-4 text-center">{guestsCount}</span>
               <button
                 type="button"
-                onClick={() => setGuestsCount(Math.min(destination.specs?.guests || 6, guestsCount + 1))}
-                className="w-8 h-8 rounded-full border border-[#E8E7E2] bg-[#F8F7F4] flex items-center justify-center text-[#1A1C1E] hover:bg-[#E8E7E2] active:scale-90 transition-all"
+                onClick={() => setGuestsCount(guestsCount + 1)}
+                className="w-7 h-7 rounded-full bg-white border border-[#EAEFEC] flex items-center justify-center text-[#1A1C1E] active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
-
-        {/* Host Card */}
-        {destination.host && (
-          <div className="my-5 bg-white p-4 rounded-3xl border border-[#E8E7E2] shadow-xs">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <img
-                  src={destination.host.avatar}
-                  alt={destination.host.name}
-                  className="w-12 h-12 rounded-full object-cover ring-2 ring-[#387FAB]/20"
-                />
-                <div>
-                  <h3 className="text-sm font-bold text-[#1A1C1E]">
-                    Hosted by {destination.host.name}
-                  </h3>
-                  <p className="text-[11px] text-[#6A717A] mt-0.5">
-                    {destination.host.role} · Response: {destination.host.responseTime}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setHostMessageOpen(true)}
-                className="p-2.5 rounded-full bg-[#E8F1F8] text-[#387FAB] hover:bg-[#387FAB] hover:text-white transition-all active:scale-95"
-                title="Message host"
-              >
-                <MessageSquare className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Host Message Dialog */}
-            {hostMessageOpen && (
-              <form onSubmit={handleSendHostMessage} className="mt-3 pt-3 border-t border-[#F4F3EF] space-y-2">
-                <textarea
-                  rows="2"
-                  value={hostMessageText}
-                  onChange={(e) => setHostMessageText(e.target.value)}
-                  placeholder={`Ask ${destination.host.name} a question about check-in or services...`}
-                  className="w-full p-2.5 bg-[#F8F7F4] border border-[#E8E7E2] rounded-xl text-xs text-[#1A1C1E] focus:outline-none focus:border-[#387FAB]"
-                  autoFocus
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setHostMessageOpen(false)}
-                    className="px-3 py-1.5 text-xs text-[#6A717A] hover:bg-[#F4F3EF] rounded-lg"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-3 py-1.5 text-xs font-bold bg-[#387FAB] text-white rounded-lg hover:bg-[#2E698D]"
-                  >
-                    Send Message
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        )}
-
-        {/* Reviews Section */}
-        {destination.reviews && destination.reviews.length > 0 && (
-          <div className="my-5">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-[#1A1C1E]">Guest Reviews</h2>
-              <span className="text-xs text-[#387FAB] font-semibold">{destination.reviews.length} written reviews</span>
-            </div>
-            <div className="space-y-3">
-              {destination.reviews.map((rev) => (
-                <div key={rev.id} className="p-3.5 bg-white rounded-2xl border border-[#E8E7E2] shadow-xs">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <img src={rev.avatar} alt={rev.author} className="w-7 h-7 rounded-full object-cover" />
-                      <div>
-                        <span className="text-xs font-bold text-[#1A1C1E] block">{rev.author}</span>
-                        <span className="text-[10px] text-[#8E95A0]">{rev.date}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(rev.rating)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-xs text-[#6A717A] leading-relaxed">
-                    "{rev.comment}"
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Bottom Sticky Action Bar (Price & Book Now Button) */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#E8E7E2] px-6 py-4 shadow-travella-lg">
-        <div className="max-w-lg mx-auto flex items-center justify-between">
+      {/* Bottom Sticky Action Bar matching Screen 3 */}
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#EAEFEC] px-6 py-4 shadow-travella">
+        <div className="max-w-md mx-auto flex items-center justify-between">
           <div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-extrabold text-[#1A1C1E]">
-                ${pricePerNight}
-              </span>
-              <span className="text-xs font-medium text-[#6A717A]">/ night</span>
-            </div>
-            <span className="text-[11px] font-semibold text-[#8E95A0] block">
-              Total: ${totalPrice} ({nights} nights)
+            <span className="text-[11px] text-[#8E95A0] block">
+              Total Price
             </span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-extrabold text-[#1A1C1E]">
+                ${pricePerDay}.00
+              </span>
+              <span className="text-xs text-[#8E95A0] font-normal">
+                per day
+              </span>
+            </div>
           </div>
 
           <button
@@ -452,7 +252,7 @@ export default function DestinationDetails({
               checkOutDate,
               totalPrice
             })}
-            className="px-8 py-3.5 bg-[#387FAB] hover:bg-[#2E698D] active:scale-95 text-white text-sm font-bold rounded-2xl shadow-travella-float transition-all duration-200"
+            className="px-8 py-3.5 bg-[#037c66] hover:bg-[#026352] active:scale-95 text-white text-sm font-bold rounded-full shadow-md transition-all duration-200"
           >
             Book Now
           </button>

@@ -19,8 +19,8 @@ export default function SearchBar({
             type="text"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search destination, country, or villa..."
-            className="w-full pl-11 pr-10 py-3.5 bg-white border border-[#E8E7E2] rounded-2xl text-[14px] font-medium text-[#1A1C1E] placeholder:text-[#8E95A0] placeholder:font-normal focus:outline-none focus:border-[#387FAB] focus:ring-2 focus:ring-[#387FAB]/20 transition-all duration-200 shadow-sm"
+            placeholder="Search your Dream place ..."
+            className="w-full pl-11 pr-10 py-3.5 bg-white border border-[#EAEFEC] rounded-2xl text-[14px] font-medium text-[#1A1C1E] placeholder:text-[#8E95A0] placeholder:font-normal focus:outline-none focus:border-[#037c66] focus:ring-2 focus:ring-[#037c66]/20 transition-all duration-200 shadow-xs"
           />
           {searchQuery && (
             <button
@@ -33,20 +33,16 @@ export default function SearchBar({
           )}
         </div>
 
-        {/* Interactive Filter Button */}
+        {/* Interactive Filter Button (Emerald green in Screen 2) */}
         <button
           type="button"
           onClick={onOpenFilter}
-          className={`relative p-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-center shadow-sm active:scale-95 ${
-            activeFilterCount > 0
-              ? 'bg-[#387FAB] text-white border-[#387FAB]'
-              : 'bg-white text-[#1A1C1E] border-[#E8E7E2] hover:bg-[#F4F3EF]'
-          }`}
+          className="relative w-12 h-12 rounded-2xl bg-[#037c66] hover:bg-[#026352] text-white transition-all duration-200 flex items-center justify-center shadow-xs active:scale-95 shrink-0"
           aria-label="Filter destinations"
         >
-          <SlidersHorizontal className="w-5 h-5" />
+          <SlidersHorizontal className="w-5 h-5 text-white" />
           {activeFilterCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#2D72D2] text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
+            <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#026352] text-white text-[11px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
               {activeFilterCount}
             </span>
           )}
